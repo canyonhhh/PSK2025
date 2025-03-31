@@ -82,7 +82,7 @@ namespace PSK2025.ApiService.Services
             };
         }
 
-        private async Task<string> GenerateJwtToken(User user)
+        private Task<string> GenerateJwtToken(User user)
         {
             var claims = new List<Claim>
             {
@@ -113,7 +113,7 @@ namespace PSK2025.ApiService.Services
                 signingCredentials: creds
             );
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return Task.FromResult(new JwtSecurityTokenHandler().WriteToken(token));
         }
     }
 }
