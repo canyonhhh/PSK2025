@@ -1,4 +1,4 @@
 export const keys = {
-    randomNumber: ["randomNumber"]
+  randomNumber: ['randomNumber'],
 };
 

@@ -1,4 +1,4 @@
 export interface RandomNumber {
-    number: number;
-};
+  number: number;
+}
 

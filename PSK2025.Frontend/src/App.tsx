@@ -1,14 +1,14 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import RandomNumber from "./components/RandomNumber"; // Import the RandomNumber component
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import RandomNumber from './components/RandomNumber'; // Import the RandomNumber component
 import {
-    QueryClient,
-    QueryClientProvider,
-} from '@tanstack/react-query'
+  QueryClient,
+  QueryClientProvider,
+} from '@tanstack/react-query';
 
 const queryClient = new QueryClient();
 
 function App() {
-    return (
+  return (
         <QueryClientProvider client={queryClient}>
             <BrowserRouter>
                 <Routes>
@@ -16,7 +16,7 @@ function App() {
                 </Routes>
             </BrowserRouter>
         </QueryClientProvider>
-    );
+  );
 }
 
 export default App;
