@@ -4,8 +4,7 @@
         <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-      <UserSecretsId>98eb9701-f322-4269-a707-0008186f0085</UserSecretsId>
-  </PropertyGroup>
+    </PropertyGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\PSK2025.Data\PSK2025.Data.csproj" />
