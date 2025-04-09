@@ -7,7 +7,7 @@ var postgresdb = postgres.AddDatabase("postgresdb");
 
 var apiService = builder.AddProject<Projects.PSK2025_ApiService>("apiservice")
     .WithReference(postgresdb)
-    .WithHttpsEndpoint()
+    .WithHttpsEndpoint(name: "https1")
     .WithExternalHttpEndpoints();
 
 builder.AddProject<PSK2025_MigrationService>("migrations")
