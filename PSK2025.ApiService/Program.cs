@@ -5,6 +5,9 @@ using Microsoft.OpenApi.Models;
 using PSK2025.ApiService.Services;
 using PSK2025.ApiService.Services.Interfaces;
 using PSK2025.Data.Contexts;
+using PSK2025.Data.Repositories;
+using PSK2025.Data.Repositories.Interfaces;
+using PSK2025.Data.Seed;
 using PSK2025.Models.Entities;
 using System.Text;
 
@@ -65,8 +68,13 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddOpenApi();
 
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
 builder.Services.AddScoped<IRandomNumberService, RandomNumberService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserService, UserService>();
+
+builder.Services.AddDataSeeders();
 
 builder.Services.AddControllers();
 
@@ -75,9 +83,9 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "Visus API",
+        Title = "PSK API",
         Version = "v1",
-        Description = "Visus application API"
+        Description = "PSK application API"
     });
 
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -122,6 +130,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+await app.Services.SeedDataAsync();
 
 app.MapControllers();
 app.MapDefaultEndpoints();

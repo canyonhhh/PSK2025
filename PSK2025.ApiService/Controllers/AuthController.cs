@@ -1,47 +1,24 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PSK2025.ApiService.Services.Interfaces;
 using PSK2025.Models.DTOs;
+using visus.Models.DTOs;
 
 namespace PSK2025.ApiService.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class AuthController : ControllerBase
+    public class AuthController(IAuthService authService) : ControllerBase
     {
-        private readonly IAuthService _authService;
-
-        public AuthController(IAuthService authService)
-        {
-            _authService = authService;
-        }
-
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterDTO model)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var (succeeded, errors) = await _authService.RegisterUserAsync(model);
-
-            if (succeeded)
-            {
-                return Ok(new { message = "User registered successfully" });
-            }
-
-            return BadRequest(new { errors });
-        }
-
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginDTO model)
+        public async Task<IActionResult> Login([FromBody] LoginDto model)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var (succeeded, token, errors) = await _authService.LoginAsync(model);
+            var (succeeded, token, errors) = await authService.LoginAsync(model);
 
             if (succeeded)
             {
@@ -51,17 +28,60 @@ namespace PSK2025.ApiService.Controllers
             return Unauthorized(new { errors });
         }
 
-        [HttpGet("user/{email}")]
-        public async Task<IActionResult> GetUserByEmail(string email)
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto model)
         {
-            var user = await _authService.GetUserByEmailAsync(email);
-
-            if (user == null)
+            if (!ModelState.IsValid)
             {
-                return NotFound();
+                return BadRequest(ModelState);
             }
 
-            return Ok(user);
+            await authService.ForgotPasswordAsync(model.Email);
+
+            return Ok(new { message = "If your email is registered, you will receive a password reset link shortly." });
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var (succeeded, errors) = await authService.ResetPasswordAsync(model.UserId, model.Token, model.NewPassword);
+
+            if (succeeded)
+            {
+                return Ok(new { message = "Password has been reset successfully." });
+            }
+
+            return BadRequest(new { errors });
+        }
+
+        [HttpPost("change-password")]
+        [Authorize]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var (succeeded, errors) = await authService.ChangePasswordAsync(userId, model.CurrentPassword, model.NewPassword);
+
+            if (succeeded)
+            {
+                return Ok(new { message = "Password changed successfully." });
+            }
+
+            return BadRequest(new { errors });
         }
     }
 }

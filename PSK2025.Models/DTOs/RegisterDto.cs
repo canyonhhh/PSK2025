@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace PSK2025.Models.DTOs
 {
-    public class RegisterDTO
+    public class RegisterDto
     {
         [Required]
         [EmailAddress]
