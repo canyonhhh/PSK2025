@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using PSK2025.ApiService.Mappings;
 using PSK2025.ApiService.Services;
 using PSK2025.ApiService.Services.Interfaces;
 using PSK2025.Data.Contexts;
@@ -12,6 +13,8 @@ using PSK2025.Models.Entities;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration.AddYamlFile("Config/user-accounts.yml", optional: false, reloadOnChange: true);
 
 // Add service defaults & Aspire client integrations.
 builder.AddServiceDefaults();
@@ -75,6 +78,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddDataSeeders();
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 builder.Services.AddControllers();
 

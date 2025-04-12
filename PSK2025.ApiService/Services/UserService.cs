@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using PSK2025.ApiService.Services.Interfaces;
 using PSK2025.Data.Repositories.Interfaces;
@@ -8,73 +9,32 @@ namespace PSK2025.ApiService.Services
 {
     public class UserService(
         IUserRepository userRepository,
-        UserManager<User> userManager)
+        UserManager<User> userManager,
+        IMapper mapper)
         : IUserService
     {
         public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
         {
             var users = await userRepository.GetAllAsync();
-            var userDtos = new List<UserDto>();
-
-            foreach (var user in users)
-            {
-                var role = await userRepository.GetUserRoleAsync(user);
-                userDtos.Add(new UserDto
-                {
-                    Id = user.Id,
-                    Email = user.Email ?? string.Empty,
-                    FirstName = user.FirstName ?? string.Empty,
-                    LastName = user.LastName ?? string.Empty,
-                });
-            }
-
-            return userDtos;
+            return mapper.Map<IEnumerable<UserDto>>(users);
         }
 
         public async Task<UserDto?> GetUserByIdAsync(string id)
         {
             var user = await userRepository.GetByIdAsync(id);
-            if (user == null)
-                return null;
-
-            var role = await userRepository.GetUserRoleAsync(user);
-
-            return new UserDto
-            {
-                Id = user.Id,
-                Email = user.Email ?? string.Empty,
-                FirstName = user.FirstName ?? string.Empty,
-                LastName = user.LastName ?? string.Empty,
-            };
+            return user == null ? null : mapper.Map<UserDto>(user);
         }
 
         public async Task<UserDto?> GetUserByEmailAsync(string email)
         {
             var user = await userRepository.GetByEmailAsync(email);
-            if (user == null)
-                return null;
-
-            var role = await userRepository.GetUserRoleAsync(user);
-
-            return new UserDto
-            {
-                Id = user.Id,
-                Email = user.Email ?? string.Empty,
-                FirstName = user.FirstName ?? string.Empty,
-                LastName = user.LastName ?? string.Empty,
-            };
+            return user == null ? null : mapper.Map<UserDto>(user);
         }
 
         public async Task<(bool Succeeded, string[] Errors)> RegisterUserAsync(RegisterDto model)
         {
-            var user = new User
-            {
-                UserName = model.Email,
-                Email = model.Email,
-                FirstName = model.FirstName,
-                LastName = model.LastName,
-            };
-
+            var user = mapper.Map<User>(model);
+            
             var (succeeded, errors) = await userRepository.CreateAsync(user, model.Password);
 
             if (succeeded)
@@ -91,12 +51,9 @@ namespace PSK2025.ApiService.Services
             if (user == null)
                 return (false, ["User not found"]);
 
-            user.FirstName = model.FirstName;
-            user.LastName = model.LastName;
-
+            mapper.Map(model, user);
             return await userRepository.UpdateAsync(user);
         }
-
         public async Task<(bool Succeeded, string[] Errors)> DeleteUserAsync(string id)
         {
             var user = await userRepository.GetByIdAsync(id);

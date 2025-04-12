@@ -55,7 +55,7 @@ namespace PSK2025.ApiService.Controllers
 
             if (succeeded)
             {
-                return Ok(new { message = "User registered successfully" });
+                return Ok();
             }
 
             return BadRequest(new { errors });
@@ -74,7 +74,7 @@ namespace PSK2025.ApiService.Controllers
 
             if (succeeded)
             {
-                return Ok(new { message = "User updated successfully" });
+                return Ok();
             }
 
             return BadRequest(new { errors });
@@ -88,7 +88,7 @@ namespace PSK2025.ApiService.Controllers
 
             if (succeeded)
             {
-                return Ok(new { message = "User deleted successfully" });
+                return Ok();
             }
 
             return BadRequest(new { errors });

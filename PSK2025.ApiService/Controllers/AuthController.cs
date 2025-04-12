@@ -38,7 +38,7 @@ namespace PSK2025.ApiService.Controllers
 
             await authService.ForgotPasswordAsync(model.Email);
 
-            return Ok(new { message = "If your email is registered, you will receive a password reset link shortly." });
+            return Ok();
         }
 
         [HttpPost("reset-password")]
@@ -53,7 +53,7 @@ namespace PSK2025.ApiService.Controllers
 
             if (succeeded)
             {
-                return Ok(new { message = "Password has been reset successfully." });
+                return Ok();
             }
 
             return BadRequest(new { errors });
@@ -78,7 +78,7 @@ namespace PSK2025.ApiService.Controllers
 
             if (succeeded)
             {
-                return Ok(new { message = "Password changed successfully." });
+                return Ok();
             }
 
             return BadRequest(new { errors });

@@ -1,0 +1,18 @@
+users:
+  - email: admin@example.com
+    password: SecurePassword123!
+    firstName: Admin
+    lastName: User
+    role: Manager
+
+  - email: customer@example.com
+    password: UserPassword123!
+    firstName: Regular
+    lastName: User
+    role: Customer
+    
+  - email: barista@example.com
+    password: BaristaPassword123!
+    firstName: Barista
+    lastName: User
+    role: Barista

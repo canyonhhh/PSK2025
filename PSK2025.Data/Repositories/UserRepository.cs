@@ -25,22 +25,19 @@ namespace PSK2025.Data.Repositories
             return await userManager.Users.ToListAsync();
         }
 
-        public async Task<(bool Succeeded, string[] Errors)> CreateAsync(User user, string password)
+        public async Task<IdentityResult> CreateAsync(User user, string password)
         {
-            var result = await userManager.CreateAsync(user, password);
-            return (result.Succeeded, result.Errors.Select(e => e.Description).ToArray());
+            return await userManager.CreateAsync(user, password);
         }
 
-        public async Task<(bool Succeeded, string[] Errors)> UpdateAsync(User user)
+        public async Task<IdentityResult> UpdateAsync(User user)
         {
-            var result = await userManager.UpdateAsync(user);
-            return (result.Succeeded, result.Errors.Select(e => e.Description).ToArray());
+            return await userManager.UpdateAsync(user);
         }
 
-        public async Task<(bool Succeeded, string[] Errors)> DeleteAsync(User user)
+        public async Task<IdentityResult> DeleteAsync(User user)
         {
-            var result = await userManager.DeleteAsync(user);
-            return (result.Succeeded, result.Errors.Select(e => e.Description).ToArray());
+            return await userManager.DeleteAsync(user);
         }
 
         public async Task<bool> CheckPasswordAsync(User user, string password)
@@ -48,20 +45,16 @@ namespace PSK2025.Data.Repositories
             return await userManager.CheckPasswordAsync(user, password);
         }
 
-        public async Task<(bool Succeeded, string[] Errors)> AddToRoleAsync(User user, string role)
+        public async Task<IdentityResult> AddToRoleAsync(User user, string role)
         {
             await EnsureRoleExistsAsync(role);
 
-            var result = await userManager.AddToRoleAsync(user, role);
-
-            return (result.Succeeded, result.Errors.Select(e => e.Description).ToArray());
+            return await userManager.AddToRoleAsync(user, role);
         }
 
-        public async Task<(bool Succeeded, string[] Errors)> RemoveFromRoleAsync(User user, string role)
+        public async Task<IdentityResult> RemoveFromRoleAsync(User user, string role)
         {
-            var result = await userManager.RemoveFromRoleAsync(user, role);
-
-            return (result.Succeeded, result.Errors.Select(e => e.Description).ToArray());
+            return await userManager.RemoveFromRoleAsync(user, role);
         }
 
         public async Task<IList<string>> GetRolesAsync(User user)
