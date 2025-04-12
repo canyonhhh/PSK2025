@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using PSK2025.ApiService.Services.Interfaces;
 using PSK2025.Data.Repositories.Interfaces;
 using PSK2025.Models.DTOs;
 using PSK2025.Models.Entities;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace PSK2025.ApiService.Services
 {
@@ -85,7 +85,7 @@ namespace PSK2025.ApiService.Services
         private async Task<string> GenerateJwtToken(User user)
         {
             var roles = await userManager.GetRolesAsync(user);
-    
+
             var claims = new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, user.Id),
@@ -125,5 +125,6 @@ namespace PSK2025.ApiService.Services
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
-        }    }
+        }
+    }
 }

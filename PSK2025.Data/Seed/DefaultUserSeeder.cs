@@ -11,12 +11,12 @@ namespace PSK2025.Data.Seed
         {
             using var scope = serviceProvider.CreateScope();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-            
+
             try
             {
                 var adminEmail = "admin@example.com";
                 var existingAdmin = await userManager.FindByEmailAsync(adminEmail);
-                
+
                 if (existingAdmin == null)
                 {
                     var adminUser = new User
@@ -27,18 +27,18 @@ namespace PSK2025.Data.Seed
                         FirstName = "Admin",
                         LastName = "User",
                     };
-                    
+
                     var result = await userManager.CreateAsync(adminUser, "SecurePassword123!");
-                    
+
                     if (result.Succeeded)
                     {
                         await userManager.AddToRoleAsync(adminUser, "Manager");
-                        
+
                         logger.LogInformation("Default admin user created successfully");
                     }
                     else
                     {
-                        logger.LogError("Failed to create default admin: {Errors}", 
+                        logger.LogError("Failed to create default admin: {Errors}",
                             string.Join(", ", result.Errors.Select(e => e.Description)));
                     }
                 }

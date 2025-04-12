@@ -10,9 +10,9 @@ namespace PSK2025.Data.Seed
         {
             using var scope = serviceProvider.CreateScope();
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-        
+
             string[] roleNames = { "Manager", "Barista", "Customer" };
-        
+
             foreach (var roleName in roleNames)
             {
                 if (!await roleManager.RoleExistsAsync(roleName))
@@ -22,4 +22,5 @@ namespace PSK2025.Data.Seed
                 }
             }
         }
-    }}
+    }
+}
