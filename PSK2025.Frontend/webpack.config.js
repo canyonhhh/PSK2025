@@ -49,35 +49,10 @@ module.exports = (env) => {
           use: "ts-loader",
         },
         {
-          test: /\.js$/,
-          exclude: /node_modules/,
-          use: {
-            loader: "babel-loader",
-            options: {
-              presets: [
-                "@babel/preset-env",
-                ["@babel/preset-react", { runtime: "automatic" }],
-              ],
-            },
-          },
-        },
-        {
           test: /\.css$/,
           exclude: /node_modules/,
           use: ["style-loader", "css-loader"],
         },
-      {
-        test: /\.(js|jsx|ts|tsx)$/,
-        exclude: /node_modules/,
-        use: [
-          {
-            loader: 'babel-loader',
-            options: {
-              presets: ['@babel/preset-env', '@babel/preset-react', '@babel/preset-typescript'],
-            },
-          },
-        ],
-      },
       ],
     },
   };
