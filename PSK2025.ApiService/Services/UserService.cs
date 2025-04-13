@@ -34,19 +34,19 @@ namespace PSK2025.ApiService.Services
         public async Task<(bool Succeeded, User? CreatedUser, string[] Errors)> RegisterUserAsync(RegisterDto model)
         {
             var user = mapper.Map<User>(model);
-            
+
             var (result, createdUser) = await userRepository.CreateAsync(user, model.Password);
-    
+
             if (result.Succeeded)
             {
                 await userManager.AddToRoleAsync(createdUser, "Customer");
                 return (true, createdUser, []);
             }
-    
+
             var errors = result.Errors.Select(e => e.Description).ToArray();
             return (false, null, errors);
         }
-        
+
         public async Task<(bool Succeeded, User? UpdatedUser, string[] Errors)> UpdateUserAsync(string id, UpdateUserDto model)
         {
             var user = await userRepository.GetByIdAsync(id);
@@ -55,7 +55,7 @@ namespace PSK2025.ApiService.Services
 
             mapper.Map(model, user);
             var (result, updatedUser) = await userRepository.UpdateAsync(user);
-            
+
             if (result.Succeeded)
             {
                 return (true, updatedUser, []);
@@ -70,12 +70,12 @@ namespace PSK2025.ApiService.Services
                 return (false, ["User not found"]);
 
             var result = await userRepository.DeleteAsync(user);
-            
+
             if (result.Succeeded)
             {
                 return (true, []);
             }
-            
+
             var errors = result.Errors.Select(e => e.Description).ToArray();
             return (false, errors);
         }
@@ -95,12 +95,12 @@ namespace PSK2025.ApiService.Services
             await userRepository.AddToRoleAsync(user, newRole);
 
             var (result, updatedUser) = await userRepository.UpdateAsync(user);
-            
+
             if (result.Succeeded)
             {
                 return (true, updatedUser, []);
             }
-            
+
             var errors = result.Errors.Select(e => e.Description).ToArray();
             return (false, null, errors);
         }

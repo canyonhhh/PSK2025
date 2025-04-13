@@ -104,7 +104,7 @@ namespace PSK2025.ApiService.Controllers
 
             return BadRequest(new { errors });
         }
-        
+
         [HttpPut("{id}/change-role")]
         [Authorize(Roles = "Manager")]
         public async Task<IActionResult> ChangeUserRole(string id, [FromBody] string newRole)

@@ -11,7 +11,6 @@ namespace PSK2025.ApiService.Services.Interfaces
         Task<(bool Succeeded, User? CreatedUser, string[] Errors)> RegisterUserAsync(RegisterDto model);
         Task<(bool Succeeded, User? UpdatedUser, string[] Errors)> UpdateUserAsync(string id, UpdateUserDto model);
         Task<(bool Succeeded, string[] Errors)> DeleteUserAsync(string id);
-        Task<(bool Succeeded, string[] Errors)> ChangePasswordAsync(string id, string currentPassword, string newPassword);
         Task<(bool Succeeded, User? UpdatedUser, string[] Errors)> ChangeUserRoleAsync(string id, string newRole);
     }
 }
