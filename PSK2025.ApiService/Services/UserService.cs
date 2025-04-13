@@ -31,23 +31,25 @@ namespace PSK2025.ApiService.Services
             return user == null ? null : mapper.Map<UserDto>(user);
         }
 
-        public async Task<(bool Succeeded, User? CreatedUser, string[] Errors)> RegisterUserAsync(RegisterDto model)
+        public async Task<(bool Succeeded, UserDto? CreatedUser, string[] Errors)> RegisterUserAsync(RegisterDto model)
         {
             var user = mapper.Map<User>(model);
 
             var (result, createdUser) = await userRepository.CreateAsync(user, model.Password);
 
+            var createdUserDto = mapper.Map<UserDto>(createdUser);
+
             if (result.Succeeded)
             {
                 await userManager.AddToRoleAsync(createdUser, "Customer");
-                return (true, createdUser, []);
+                return (true, createdUserDto, []);
             }
 
             var errors = result.Errors.Select(e => e.Description).ToArray();
             return (false, null, errors);
         }
 
-        public async Task<(bool Succeeded, User? UpdatedUser, string[] Errors)> UpdateUserAsync(string id, UpdateUserDto model)
+        public async Task<(bool Succeeded, UserDto? UpdatedUser, string[] Errors)> UpdateUserAsync(string id, UpdateUserDto model)
         {
             var user = await userRepository.GetByIdAsync(id);
             if (user == null)
@@ -56,9 +58,11 @@ namespace PSK2025.ApiService.Services
             mapper.Map(model, user);
             var (result, updatedUser) = await userRepository.UpdateAsync(user);
 
+            var updatedUserDto = mapper.Map<UserDto>(updatedUser);
+
             if (result.Succeeded)
             {
-                return (true, updatedUser, []);
+                return (true, updatedUserDto, []);
             }
             var errors = result.Errors.Select(e => e.Description).ToArray();
             return (false, null, errors);
@@ -80,7 +84,7 @@ namespace PSK2025.ApiService.Services
             return (false, errors);
         }
 
-        public async Task<(bool Succeeded, User? UpdatedUser, string[] Errors)> ChangeUserRoleAsync(string id, string newRole)
+        public async Task<(bool Succeeded, UserDto? UpdatedUser, string[] Errors)> ChangeUserRoleAsync(string id, string newRole)
         {
             var user = await userRepository.GetByIdAsync(id);
             if (user == null)
@@ -96,9 +100,11 @@ namespace PSK2025.ApiService.Services
 
             var (result, updatedUser) = await userRepository.UpdateAsync(user);
 
+            var updatedUserDto = mapper.Map<UserDto>(updatedUser);
+
             if (result.Succeeded)
             {
-                return (true, updatedUser, []);
+                return (true, updatedUserDto, []);
             }
 
             var errors = result.Errors.Select(e => e.Description).ToArray();

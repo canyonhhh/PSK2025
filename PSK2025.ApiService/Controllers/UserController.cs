@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PSK2025.ApiService.Services.Interfaces;
@@ -7,7 +8,7 @@ namespace PSK2025.ApiService.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class UserController(IUserService userService) : ControllerBase
+    public class UserController(IUserService userService, IAuthService authService, IMapper mapper) : ControllerBase
     {
         [HttpGet]
         [Authorize(Roles = "Manager")]
@@ -53,12 +54,23 @@ namespace PSK2025.ApiService.Controllers
 
             var (succeeded, user, errors) = await userService.RegisterUserAsync(model);
 
-            if (succeeded)
+
+            if (!succeeded)
             {
-                return CreatedAtAction(nameof(GetUser), new { id = user!.Id }, user);
+                return BadRequest(new { errors });
             }
 
-            return BadRequest(new { errors });
+            var loginDto = mapper.Map<LoginDto>(model);
+
+            var (loginSucceeded, token, loginErrors) = await authService.LoginAsync(loginDto);
+
+            if (!loginSucceeded)
+            {
+                return BadRequest(new { loginErrors });
+            }
+
+            return CreatedAtAction(nameof(GetUser), new { id = user!.Id }, new { token });
+
         }
 
         [HttpPut("{id}")]

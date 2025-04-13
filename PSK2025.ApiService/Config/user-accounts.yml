@@ -1,7 +1,7 @@
 users:
-  - email: admin@example.com
+  - email: manager@example.com
     password: SecurePassword123!
-    firstName: Admin
+    firstName: Manager
     lastName: User
     role: Manager
 

@@ -27,6 +27,7 @@ namespace PSK2025.Data.Repositories
 
         public async Task<(IdentityResult, User)> CreateAsync(User user, string password)
         {
+            user.UserName = user.Email;
             return (await userManager.CreateAsync(user, password), user);
         }
 

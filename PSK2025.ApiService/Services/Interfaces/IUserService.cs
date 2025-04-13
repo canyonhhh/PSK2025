@@ -8,9 +8,9 @@ namespace PSK2025.ApiService.Services.Interfaces
         Task<IEnumerable<UserDto>> GetAllUsersAsync();
         Task<UserDto?> GetUserByIdAsync(string id);
         Task<UserDto?> GetUserByEmailAsync(string email);
-        Task<(bool Succeeded, User? CreatedUser, string[] Errors)> RegisterUserAsync(RegisterDto model);
-        Task<(bool Succeeded, User? UpdatedUser, string[] Errors)> UpdateUserAsync(string id, UpdateUserDto model);
+        Task<(bool Succeeded, UserDto? CreatedUser, string[] Errors)> RegisterUserAsync(RegisterDto model);
+        Task<(bool Succeeded, UserDto? UpdatedUser, string[] Errors)> UpdateUserAsync(string id, UpdateUserDto model);
         Task<(bool Succeeded, string[] Errors)> DeleteUserAsync(string id);
-        Task<(bool Succeeded, User? UpdatedUser, string[] Errors)> ChangeUserRoleAsync(string id, string newRole);
+        Task<(bool Succeeded, UserDto? UpdatedUser, string[] Errors)> ChangeUserRoleAsync(string id, string newRole);
     }
 }
