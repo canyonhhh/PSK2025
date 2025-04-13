@@ -9,9 +9,9 @@ namespace PSK2025.ApiService.Mappings
         public MappingProfile()
         {
             CreateMap<User, UserDto>();
-            
+
             CreateMap<RegisterDto, User>();
-                
+
             CreateMap<UpdateUserDto, User>();
         }
     }

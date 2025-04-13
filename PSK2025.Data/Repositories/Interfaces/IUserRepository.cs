@@ -8,8 +8,8 @@ namespace PSK2025.Data.Repositories.Interfaces
         Task<User?> GetByIdAsync(string id);
         Task<User?> GetByEmailAsync(string email);
         Task<IEnumerable<User>> GetAllAsync();
-        Task<IdentityResult> CreateAsync(User user, string password);
-        Task<IdentityResult> UpdateAsync(User user);
+        Task<(IdentityResult, User)> CreateAsync(User user, string password);
+        Task<(IdentityResult, User)> UpdateAsync(User user);
         Task<IdentityResult> DeleteAsync(User user);
         Task<bool> CheckPasswordAsync(User user, string password);
         Task<IdentityResult> AddToRoleAsync(User user, string role);

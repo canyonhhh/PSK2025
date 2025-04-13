@@ -51,11 +51,11 @@ namespace PSK2025.ApiService.Controllers
                 return BadRequest(ModelState);
             }
 
-            var (succeeded, errors) = await userService.RegisterUserAsync(model);
+            var (succeeded, user, errors) = await userService.RegisterUserAsync(model);
 
             if (succeeded)
             {
-                return Ok();
+                return CreatedAtAction(nameof(GetUser), new { id = user!.Id }, user);
             }
 
             return BadRequest(new { errors });
@@ -67,14 +67,20 @@ namespace PSK2025.ApiService.Controllers
         {
             if (!ModelState.IsValid)
             {
+
                 return BadRequest(ModelState);
             }
 
-            var (succeeded, errors) = await userService.UpdateUserAsync(id, model);
+            var (succeeded, user, errors) = await userService.UpdateUserAsync(id, model);
 
             if (succeeded)
             {
-                return Ok();
+                return Ok(user);
+            }
+
+            if (errors.Contains("User not found"))
+            {
+                return NotFound();
             }
 
             return BadRequest(new { errors });
@@ -88,7 +94,31 @@ namespace PSK2025.ApiService.Controllers
 
             if (succeeded)
             {
-                return Ok();
+                return NoContent();
+            }
+
+            if (errors.Contains("User not found"))
+            {
+                return NotFound();
+            }
+
+            return BadRequest(new { errors });
+        }
+        
+        [HttpPut("{id}/change-role")]
+        [Authorize(Roles = "Manager")]
+        public async Task<IActionResult> ChangeUserRole(string id, [FromBody] string newRole)
+        {
+            var (succeeded, user, errors) = await userService.ChangeUserRoleAsync(id, newRole);
+
+            if (succeeded)
+            {
+                return Ok(user);
+            }
+
+            if (errors.Contains("User not found"))
+            {
+                return NotFound();
             }
 
             return BadRequest(new { errors });

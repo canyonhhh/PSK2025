@@ -22,7 +22,7 @@ namespace PSK2025.Data.Seed
                 {
                     Users = new List<UserAccount>()
                 };
-                
+
                 logger.LogInformation($"configuration: {configuration.GetSection("Users").Value}");
 
                 configuration.GetSection("Users").Bind(userSeedData.Users);
@@ -37,7 +37,7 @@ namespace PSK2025.Data.Seed
                 {
                     if (!await roleManager.RoleExistsAsync(userAccount.Role))
                     {
-                        logger.LogWarning("Skipping user {Email} because role {Role} does not exist", 
+                        logger.LogWarning("Skipping user {Email} because role {Role} does not exist",
                             userAccount.Email, userAccount.Role);
                         continue;
                     }
@@ -60,7 +60,7 @@ namespace PSK2025.Data.Seed
                         if (result.Succeeded)
                         {
                             await userManager.AddToRoleAsync(user, userAccount.Role);
-                            logger.LogInformation("User {Email} created successfully with role {Role}", 
+                            logger.LogInformation("User {Email} created successfully with role {Role}",
                                 userAccount.Email, userAccount.Role);
                         }
                         else

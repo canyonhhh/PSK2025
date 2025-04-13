@@ -25,14 +25,14 @@ namespace PSK2025.Data.Repositories
             return await userManager.Users.ToListAsync();
         }
 
-        public async Task<IdentityResult> CreateAsync(User user, string password)
+        public async Task<(IdentityResult, User)> CreateAsync(User user, string password)
         {
-            return await userManager.CreateAsync(user, password);
+            return (await userManager.CreateAsync(user, password), user);
         }
 
-        public async Task<IdentityResult> UpdateAsync(User user)
+        public async Task<(IdentityResult, User)> UpdateAsync(User user)
         {
-            return await userManager.UpdateAsync(user);
+            return (await userManager.UpdateAsync(user), user);
         }
 
         public async Task<IdentityResult> DeleteAsync(User user)
