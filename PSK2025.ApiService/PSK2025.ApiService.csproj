@@ -4,7 +4,8 @@
         <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-    </PropertyGroup>
+      <UserSecretsId>ae7a1a16-bed0-4d64-9489-b058b72b56f0</UserSecretsId>
+  </PropertyGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\PSK2025.Data\PSK2025.Data.csproj" />
@@ -12,10 +13,19 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Content Include="Config\**\*">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.1.0" />
+        <PackageReference Include="AutoMapper" Version="14.0.0" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.3" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.2" />
+        <PackageReference Include="NetEscapades.Configuration.Yaml" Version="3.1.0" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="8.0.0" />
+        <PackageReference Include="YamlDotNet" Version="16.3.0" />
     </ItemGroup>
 
     <ItemGroup>
