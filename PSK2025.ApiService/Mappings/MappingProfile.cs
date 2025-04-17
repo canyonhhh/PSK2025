@@ -8,17 +8,21 @@ namespace PSK2025.ApiService.Mappings
     {
         public MappingProfile()
         {
+            // User mappings
             CreateMap<User, UserDto>();
-
             CreateMap<RegisterDto, User>();
-
             CreateMap<UpdateUserDto, User>();
-
             CreateMap<RegisterDto, LoginDto>()
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
                 .ForMember(dest => dest.Password, opt => opt.MapFrom(src => src.Password))
                 .ForMember(dest => dest.RememberMe, opt => opt.MapFrom(src => false));
 
+            // Product mappings
+            CreateMap<Product, ProductDto>();
+
+            CreateMap<CreateProductDto, Product>();
+
+            CreateMap<UpdateProductDto, Product>();
         }
     }
 }

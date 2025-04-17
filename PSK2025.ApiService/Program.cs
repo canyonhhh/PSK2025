@@ -71,11 +71,15 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddOpenApi();
 
+// Register repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
+// Register services
 builder.Services.AddScoped<IRandomNumberService, RandomNumberService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IProductService, ProductService>();
 
 builder.Services.AddDataSeeders();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
@@ -126,7 +130,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Visus API v1");
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "PSK API v1");
         c.RoutePrefix = string.Empty;
     });
     app.MapOpenApi();

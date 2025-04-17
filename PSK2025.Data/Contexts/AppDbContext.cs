@@ -7,6 +7,8 @@ namespace PSK2025.Data.Contexts
 {
     public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<User>(options)
     {
+        public DbSet<Product> Products { get; set; } = null!;
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder); // This is important for Identity tables
