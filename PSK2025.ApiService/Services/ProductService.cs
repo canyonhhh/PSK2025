@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.Extensions.Logging;
 using PSK2025.ApiService.Services.Interfaces;
 using PSK2025.Data.Repositories.Interfaces;
 using PSK2025.Models.DTOs;
@@ -7,7 +8,7 @@ using PSK2025.Models.Enums;
 
 namespace PSK2025.ApiService.Services
 {
-    public class ProductService(IProductRepository productRepository, IMapper mapper) : IProductService
+    public class ProductService(IProductRepository productRepository, IMapper mapper, ILogger<IProductService> logger) : IProductService
     {
         public async Task<List<ProductDto>> GetAllProductsAsync()
         {
@@ -35,8 +36,9 @@ namespace PSK2025.ApiService.Services
                 var createdProduct = await productRepository.CreateAsync(product);
                 return (mapper.Map<ProductDto>(createdProduct), ServiceError.None);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                logger.LogError($"Error creating product: {ex.Message}");
                 return (null, ServiceError.DatabaseError);
             }
         }
@@ -62,8 +64,9 @@ namespace PSK2025.ApiService.Services
 
                 return (mapper.Map<ProductDto>(updatedProduct), ServiceError.None);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                logger.LogError($"Error updating product with ID {id}: {ex.Message}");
                 return (null, ServiceError.DatabaseError);
             }
         }

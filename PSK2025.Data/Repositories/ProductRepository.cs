@@ -20,6 +20,7 @@ namespace PSK2025.Data.Repositories
         public async Task<Product> CreateAsync(Product item)
         {
             item.CreatedAt = DateTime.UtcNow;
+            item.UpdatedAt = DateTime.UtcNow;
 
             dbContext.Products.Add(item);
             await dbContext.SaveChangesAsync();
