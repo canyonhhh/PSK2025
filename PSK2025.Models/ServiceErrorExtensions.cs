@@ -7,7 +7,7 @@ namespace PSK2025.Models.Extensions
         public static string GetErrorMessage(this ServiceError error, string? entityName = null)
         {
             var entity = string.IsNullOrEmpty(entityName) ? "resource" : entityName.ToLowerInvariant();
-            
+
             return error switch
             {
                 ServiceError.NotFound => $"The requested {entity} was not found.",
@@ -19,7 +19,7 @@ namespace PSK2025.Models.Extensions
                 ServiceError.Unknown or _ => "An unexpected error occurred."
             };
         }
-        
+
         public static int GetStatusCode(this ServiceError error)
         {
             return error switch
