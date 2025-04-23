@@ -1,5 +1,5 @@
 const HTMLWebpackPlugin = require("html-webpack-plugin");
-const ESLintPlugin = require('eslint-webpack-plugin');
+const ESLintPlugin = require("eslint-webpack-plugin");
 const path = require("path");
 
 module.exports = (env) => {
@@ -36,10 +36,10 @@ module.exports = (env) => {
         template: "./src/index.html",
         favicon: "./src/favicon.ico",
       }),
-    new ESLintPlugin({
-      extensions: ['js', 'jsx', 'ts', 'tsx'], // Lint JS, JSX, TS, and TSX files
-      emitWarning: true, // Emit warnings for ESLint errors
-    }),
+      new ESLintPlugin({
+        extensions: ["js", "jsx", "ts", "tsx"], // Lint JS, JSX, TS, and TSX files
+        emitWarning: true, // Emit warnings for ESLint errors
+      }),
     ],
     module: {
       rules: [
