@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.Extensions.Logging;
 using PSK2025.ApiService.Services.Interfaces;
-using PSK2025.Data.Migrations;
 using PSK2025.Data.Repositories.Interfaces;
 using PSK2025.Models.DTOs;
 using PSK2025.Models.Entities;
@@ -22,36 +21,46 @@ namespace PSK2025.ApiService.Services
             _logger = logger;
         }
 
-        public async Task<List<CartItemDto>> GetCartAsync(Guid userId)
+        public async Task<CartDto> GetCartAsync(Guid userId)
         {
-            var cartItems = await _cartRepository.GetCartItemsAsync(userId);
-            return _mapper.Map<List<CartItemDto>>(cartItems);
+            var cart = await _cartRepository.GetCartAsync(userId);
+
+            if (cart == null)
+            {
+                return null; 
+            }
+
+            return _mapper.Map<CartDto>(cart);
         }
 
-        public async Task<ServiceError> AddItemToCartAsync(Guid userId, Guid itemId)
+        public async Task<ServiceError> AddItemToCartAsync(Guid userId, Guid itemId, int quantity)
         {
             try
             {
-                var existingItem = await _cartRepository.GetCartItemAsync(userId, itemId);
+                var cart = await _cartRepository.GetCartAsync(userId);
 
-                if (existingItem != null)
+                if (cart == null)
                 {
-                    existingItem.Quantity++;
-                    await _cartRepository.UpdateAsync(existingItem);
-                }
-                else
-                {
-                    var newItem = new CartItem
+                    cart = new Cart
                     {
                         Id = Guid.NewGuid(),
                         UserId = userId,
-                        ItemId = itemId,
-                        Quantity = 1
+                        Status = CartStatus.Active,
+                        CreatedAt = DateTime.UtcNow,
+                        Items = new List<CartItem>()
                     };
-                    await _cartRepository.AddItemAsync(newItem);
-                }
 
-                await _cartRepository.SaveChangesAsync();
+                    await _cartRepository.CreateCartAsync(cart);
+                }
+                cart = await _cartRepository.GetCartAsync(userId);
+                var cartItem = new CartItem
+                {
+                    CartId = cart.Id,
+                    ItemId = itemId,
+                    Quantity = quantity
+                };
+
+                await _cartRepository.AddItemToCartAsync(cart.Id, cartItem);
                 return ServiceError.None;
             }
             catch (Exception ex)
@@ -61,38 +70,62 @@ namespace PSK2025.ApiService.Services
             }
         }
 
-        public async Task<ServiceError> UpdateCartItemAsync(Guid cartItemId, int quantity)
+        public async Task<ServiceError> UpdateCartItemAsync(Guid userId, Guid itemId, int quantity)
         {
-            var existingItem = await _cartRepository.GetCartItemAsync(cartItemId, cartItemId);
-
-            if (existingItem == null)
+            try
             {
-                return ServiceError.NotFound;
-            }
+                var cart = await _cartRepository.GetCartAsync(userId);
 
-            existingItem.Quantity = quantity;
-            await _cartRepository.UpdateAsync(existingItem);
-            return ServiceError.None;
+                if (cart == null || cart.Items == null)
+                {
+                    return ServiceError.NotFound;
+                }
+
+                var cartItem = cart.Items.FirstOrDefault(i => i.ItemId == itemId);
+
+                if (cartItem == null)
+                {
+                    return ServiceError.NotFound;
+                }
+
+                cartItem.Quantity = quantity;
+                cart.UpdatedAt = DateTime.UtcNow;
+
+                await _cartRepository.UpdateCartAsync(cart);
+                return ServiceError.None;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error updating cart item: {ex.Message}");
+                return ServiceError.DatabaseError;
+            }
         }
 
-        public async Task<ServiceError> DeleteCartItemAsync(Guid cartItemId, Guid userId)
+        public async Task<ServiceError> DeleteCartItemAsync(Guid userId, Guid itemId)
         {
-            var item = await _cartRepository.GetCartItemAsync(userId, cartItemId);
-
-            if (item == null)
+            try
             {
-                return ServiceError.NotFound;
+                var cart = await _cartRepository.GetCartAsync(userId);
+
+                if (cart == null)
+                {
+                    return ServiceError.NotFound;
+                }
+
+                var isDeleted = await _cartRepository.RemoveItemFromCartAsync(cart.Id, itemId);
+
+                if (!isDeleted)
+                {
+                    return ServiceError.NotFound;
+                }
+
+                return ServiceError.None;
             }
-
-            var isDeleted = await _cartRepository.DeleteAsync(userId, cartItemId);
-
-            if (!isDeleted)
+            catch (Exception ex)
             {
-                return ServiceError.NotFound;
+                _logger.LogError($"Error deleting cart item: {ex.Message}");
+                return ServiceError.DatabaseError;
             }
-
-            return ServiceError.None;
         }
-
     }
 }

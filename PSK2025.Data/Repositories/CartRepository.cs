@@ -1,74 +1,88 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PSK2025.Data.Contexts;
-using PSK2025.Data.Migrations;
 using PSK2025.Data.Repositories.Interfaces;
 using PSK2025.Models.Entities;
 
-namespace PSK2025.Data.Repositories
+public class CartRepository : ICartRepository
 {
-    public class CartRepository : ICartRepository
+    private readonly AppDbContext _dbContext;
+
+    public CartRepository(AppDbContext dbContext)
     {
-        private readonly AppDbContext _dbContext;
+        _dbContext = dbContext;
+    }
 
-        public CartRepository(AppDbContext dbContext)
+    public async Task<Cart?> GetCartAsync(Guid userId)
+    {
+        return await _dbContext.Carts
+            .Include(c => c.Items) 
+            .FirstOrDefaultAsync(c => c.UserId == userId);
+    }
+
+    public async Task CreateCartAsync(Cart cart)
+    {
+        await _dbContext.Carts.AddAsync(cart);
+        await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task AddItemToCartAsync(Guid cartId, CartItem cartItem)
+    {
+        var cart = await _dbContext.Carts
+            .Include(c => c.Items)
+            .FirstOrDefaultAsync(c => c.Id == cartId);
+
+        if (cart == null)
         {
-            _dbContext = dbContext;
+            throw new InvalidOperationException("Cart not found.");
         }
 
-        public async Task AddItemAsync(CartItem cartItem)
+        var existingItem = cart.Items.FirstOrDefault(i => i.ItemId == cartItem.ItemId);
+        if (existingItem != null)
         {
-            await _dbContext.CartItems.AddAsync(cartItem);
+            existingItem.Quantity += cartItem.Quantity; 
+        }
+        else
+        {
+            cartItem.Id = Guid.Empty;
+            cart.Items.Add(cartItem);
         }
 
-        public async Task<CartItem?> GetCartItemAsync(Guid userId, Guid itemId)
+        cart.UpdatedAt = DateTime.UtcNow;
+        await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task UpdateCartAsync(Cart cart)
+    {
+        _dbContext.Carts.Update(cart);
+        await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task<bool> RemoveItemFromCartAsync(Guid cartId, Guid itemId)
+    {
+        var cart = await _dbContext.Carts
+            .Include(c => c.Items)
+            .FirstOrDefaultAsync(c => c.Id == cartId);
+
+        if (cart == null)
         {
-            return await _dbContext.CartItems
-                .FirstOrDefaultAsync(c => c.UserId == userId && c.ItemId == itemId);
+            return false;
         }
 
-        public async Task<List<CartItem>> GetCartItemsAsync(Guid userId)
+        var item = cart.Items.FirstOrDefault(i => i.ItemId == itemId);
+        if (item == null)
         {
-            return await _dbContext.CartItems
-                .Where(c => c.UserId == userId)
-                .ToListAsync();
+            return false;
         }
 
+        cart.Items.Remove(item);
+        cart.UpdatedAt = DateTime.UtcNow;
+        await _dbContext.SaveChangesAsync();
 
-        public async Task<CartItem?> UpdateAsync(CartItem cartItem)
-        {
-            var existingItem = await _dbContext.CartItems.FindAsync(cartItem.Id);
+        return true;
+    }
 
-            if (existingItem == null)
-            {
-                return null;
-            }
-
-            existingItem.Quantity = cartItem.Quantity;
-            await _dbContext.SaveChangesAsync();
-
-            return existingItem;
-        }
-
-        public async Task<bool> DeleteAsync(Guid userId, Guid itemId)
-        {
-            var item = await _dbContext.CartItems
-                .FirstOrDefaultAsync(c => c.UserId == userId && c.ItemId == itemId);
-
-            if (item == null)
-            {
-                return false;
-            }
-
-            _dbContext.CartItems.Remove(item);
-            await _dbContext.SaveChangesAsync();
-
-            return true;
-        }
-
-
-        public async Task SaveChangesAsync()
-        {
-            await _dbContext.SaveChangesAsync();
-        }
+    public async Task SaveChangesAsync()
+    {
+        await _dbContext.SaveChangesAsync();
     }
 }

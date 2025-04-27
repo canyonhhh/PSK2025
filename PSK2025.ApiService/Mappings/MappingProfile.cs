@@ -10,7 +10,6 @@ namespace PSK2025.ApiService.Mappings
         {
             // User mappings
             CreateMap<User, UserDto>();
-            CreateMap<CartItem, CartItemDto>();
             CreateMap<RegisterDto, User>();
             CreateMap<UpdateUserDto, User>();
             CreateMap<RegisterDto, LoginDto>()
@@ -24,6 +23,10 @@ namespace PSK2025.ApiService.Mappings
             CreateMap<CreateProductDto, Product>();
 
             CreateMap<UpdateProductDto, Product>();
+
+            // Cart mappings
+            CreateMap<CartItem, CartItemDto>();
+            CreateMap<Cart, CartDto>();
         }
     }
 }

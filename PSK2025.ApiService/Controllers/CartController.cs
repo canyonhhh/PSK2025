@@ -1,12 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PSK2025.ApiService.Services.Interfaces;
 using PSK2025.Models.DTOs;
 using PSK2025.Models.Enums;
+using PSK2025.Models.Extensions;
+using System.Security.Claims;
 
 namespace PSK2025.ApiService.Controllers
 {
     [ApiController]
-    [Route("api/cart")]
+    [Route("[controller]")]
+    [Authorize]
     public class CartController : ControllerBase
     {
         private readonly ICartService _cartService;
@@ -16,52 +20,68 @@ namespace PSK2025.ApiService.Controllers
             _cartService = cartService;
         }
 
-        [HttpGet("{userId}")]
-        public async Task<IActionResult> GetCart(Guid userId)
+        private Guid GetUserIdFromToken()
         {
-            var cartItems = await _cartService.GetCartAsync(userId);
-            return Ok(cartItems);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim))
+            {
+                throw new UnauthorizedAccessException("User ID not found in token.");
+            }
+            return Guid.Parse(userIdClaim);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetCart()
+        {
+            var userId = GetUserIdFromToken();
+            var cart = await _cartService.GetCartAsync(userId);
+
+            if (cart == null)
+                return StatusCode(ServiceError.NotFound.GetStatusCode(), ServiceError.NotFound.GetErrorMessage("Cart"));
+
+            return Ok(cart);
         }
 
         [HttpPost("add")]
         public async Task<IActionResult> AddToCart([FromBody] AddCartItemDto model)
         {
-            var result = await _cartService.AddItemToCartAsync(model.UserId, model.ItemId);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            if (result == ServiceError.None)
-            {
-                return Ok(new { Message = "Item added to cart successfully." });
-            }
+            var userId = GetUserIdFromToken();
+            var error = await _cartService.AddItemToCartAsync(userId, model.ItemId, model.Quantity);
 
-            return BadRequest(new { Error = result.ToString() });
+            if (error == ServiceError.None)
+                return Ok();
+
+            return StatusCode(error.GetStatusCode(), error.GetErrorMessage("Cart Item"));
         }
 
-        [HttpPut("update/{cartItemId}")]
-        public async Task<IActionResult> UpdateCartItem(Guid cartItemId, [FromBody] UpdateCartItemDto model)
+        [HttpPut("update")]
+        public async Task<IActionResult> UpdateCartItem([FromQuery] Guid itemId, [FromBody] UpdateCartItemDto model)
         {
-            var result = await _cartService.UpdateCartItemAsync(cartItemId, model.Quantity);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            if (result == ServiceError.None)
-            {
-                return Ok(new { Message = "Cart item updated successfully." });
-            }
+            var userId = GetUserIdFromToken();
+            var error = await _cartService.UpdateCartItemAsync(userId, itemId, model.Quantity);
 
-            return BadRequest(new { Error = result.ToString() });
+            if (error == ServiceError.None)
+                return Ok();
+
+            return StatusCode(error.GetStatusCode(), error.GetErrorMessage("Cart Item"));
         }
-        [HttpDelete("delete/{cartItemId}")]
-        public async Task<IActionResult> DeleteCartItem(Guid cartItemId, [FromQuery] Guid userId)
+
+        [HttpDelete("delete")]
+        public async Task<IActionResult> DeleteCartItem([FromQuery] Guid itemId)
         {
-            var result = await _cartService.DeleteCartItemAsync(cartItemId, userId);
+            var userId = GetUserIdFromToken();
+            var error = await _cartService.DeleteCartItemAsync(userId, itemId);
 
-            if (result == ServiceError.None)
-            {
-                return Ok(new { Message = "Cart item deleted successfully." });
-            }
+            if (error == ServiceError.None)
+                return NoContent();
 
-            return BadRequest(new { Error = result.ToString() });
+            return StatusCode(error.GetStatusCode(), error.GetErrorMessage("Cart Item"));
         }
-
-
-
     }
 }

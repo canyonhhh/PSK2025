@@ -2,7 +2,7 @@
 {
     public class AddCartItemDto
     {
-        public Guid UserId { get; set; }
+        public int Quantity { get; set; }
         public Guid ItemId { get; set; }
     }
 
