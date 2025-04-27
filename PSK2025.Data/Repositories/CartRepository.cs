@@ -11,7 +11,12 @@ public class CartRepository : ICartRepository
     {
         _dbContext = dbContext;
     }
-
+    public async Task<List<Cart>> GetAllCartsAsync()
+    {
+        return await _dbContext.Carts
+            .Include(c => c.Items)
+            .ToListAsync();
+    }
     public async Task<Cart?> GetCartAsync(Guid userId)
     {
         return await _dbContext.Carts

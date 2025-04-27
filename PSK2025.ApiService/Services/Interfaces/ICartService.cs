@@ -5,6 +5,7 @@ namespace PSK2025.ApiService.Services.Interfaces
 {
     public interface ICartService
     {
+        Task<(List<CartDto>, ServiceError)> GetAllCartsAsync();
         Task<CartDto> GetCartAsync(Guid userId);
         Task<ServiceError> AddItemToCartAsync(Guid userId, Guid itemId, int quantity);
         Task<ServiceError> UpdateCartItemAsync(Guid userId, Guid itemId, int quantity);

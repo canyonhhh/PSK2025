@@ -5,6 +5,7 @@ namespace PSK2025.Data.Repositories.Interfaces
 {
     public interface ICartRepository
     {
+        Task<List<Cart>> GetAllCartsAsync();
         Task<Cart?> GetCartAsync(Guid userId);
         Task CreateCartAsync(Cart cart);
         Task AddItemToCartAsync(Guid cartId, CartItem cartItem);

@@ -12,13 +12,24 @@ namespace PSK2025.ApiService.Services
     {
         private readonly ICartRepository _cartRepository;
         private readonly IMapper _mapper;
-        private readonly ILogger<ICartService> _logger;
 
-        public CartService(ICartRepository cartRepository, IMapper mapper, ILogger<ICartService> logger)
+        public CartService(ICartRepository cartRepository, IMapper mapper)
         {
             _cartRepository = cartRepository;
             _mapper = mapper;
-            _logger = logger;
+        }
+        public async Task<(List<CartDto>, ServiceError)> GetAllCartsAsync()
+        {
+            try
+            {
+                var carts = await _cartRepository.GetAllCartsAsync();
+                var cartsDto = _mapper.Map<List<CartDto>>(carts);
+                return (cartsDto, ServiceError.None);
+            }
+            catch (Exception ex)
+            {
+                return (new List<CartDto>(), ServiceError.DatabaseError);
+            }
         }
 
         public async Task<CartDto> GetCartAsync(Guid userId)
@@ -65,7 +76,6 @@ namespace PSK2025.ApiService.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error adding item to cart: {ex.Message}");
                 return ServiceError.DatabaseError;
             }
         }
@@ -96,7 +106,6 @@ namespace PSK2025.ApiService.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error updating cart item: {ex.Message}");
                 return ServiceError.DatabaseError;
             }
         }
@@ -123,7 +132,6 @@ namespace PSK2025.ApiService.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error deleting cart item: {ex.Message}");
                 return ServiceError.DatabaseError;
             }
         }

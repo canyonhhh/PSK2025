@@ -29,9 +29,19 @@ namespace PSK2025.ApiService.Controllers
             }
             return Guid.Parse(userIdClaim);
         }
+        [HttpGet("all")]
+        [Authorize(Roles = "Manager")]
+        public async Task<IActionResult> GetAllCarts()
+        {
+            var (carts, error) = await _cartService.GetAllCartsAsync();
 
+            if (error == ServiceError.None)
+                return Ok(carts);
+
+            return StatusCode(error.GetStatusCode(), error.GetErrorMessage("Carts"));
+        }
         [HttpGet]
-        public async Task<IActionResult> GetCart()
+        public async Task<IActionResult> GetActiveCart()
         {
             var userId = GetUserIdFromToken();
             var cart = await _cartService.GetCartAsync(userId);
