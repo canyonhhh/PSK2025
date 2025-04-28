@@ -5,7 +5,7 @@
 namespace PSK2025.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class pickupp : Migration
+    public partial class AddCartTables : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

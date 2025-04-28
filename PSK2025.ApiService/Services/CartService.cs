@@ -109,7 +109,7 @@ namespace PSK2025.ApiService.Services
                 return ServiceError.DatabaseError;
             }
         }
-        public async Task<ServiceError> CheckoutCartAsync(Guid userId, DateTime pickupTime)
+        public async Task<ServiceError> SetPickupTimeAsync(Guid userId, DateTime pickupTime)
         {
             var (cart, error) = await _cartRepository.GetOrCreateCartAsync(userId);
             if (error != ServiceError.None || cart == null) return ServiceError.NotFound;
