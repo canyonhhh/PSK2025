@@ -53,6 +53,10 @@ module.exports = (env) => {
           exclude: /node_modules/,
           use: ["style-loader", "css-loader"],
         },
+        {
+          test: /\.(png|jpe?g|gif|svg)$/i,
+          type: 'asset/resource',
+        },
       ],
     },
   };

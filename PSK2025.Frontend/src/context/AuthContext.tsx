@@ -2,7 +2,7 @@ import { createContext, ReactNode, useContext, useState } from "react";
 import { Role, roleToRoleEnum } from "../routing/roles";
 import { jwtDecode } from "jwt-decode";
 
-const AUTH_TOKEN_KEY = "api_auth";
+export const AUTH_TOKEN_KEY = "api_auth";
 
 interface TokenPayload {
   role: string;
