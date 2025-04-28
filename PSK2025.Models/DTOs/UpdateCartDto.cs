@@ -1,11 +1,13 @@
-﻿using System;
+﻿using PSK2025.Models.Enums;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace PSK2025.Models.DTOs
 {
-    public class PickupTimeDto
+    public class UpdateCartDto
     {
         [Required]
         public DateTime PickupTime { get; set; }
+        public CartStatus Status { get; set; }
     }
 }

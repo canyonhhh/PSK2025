@@ -82,11 +82,11 @@ namespace PSK2025.ApiService.Controllers
             return StatusCode(error.GetStatusCode(), error.GetErrorMessage("Cart Item"));
         }
 
-        [HttpPost("pickup-time")]
-        public async Task<IActionResult> SetPickupTime([FromBody] PickupTimeDto model)
+        [HttpPost("updateCart")]
+        public async Task<IActionResult> UpdateCart([FromBody] UpdateCartDto model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            var error = await _cartService.SetPickupTimeAsync(GetUserIdFromToken(), model.PickupTime);
+            var error = await _cartService.UpdateCartAsync(GetUserIdFromToken(), model.PickupTime, model.Status);
             return error == ServiceError.None ? Ok() : StatusCode(error.GetStatusCode(), error.GetErrorMessage("Cart"));
         }
 

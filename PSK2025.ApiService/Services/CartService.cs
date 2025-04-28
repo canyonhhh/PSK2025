@@ -109,13 +109,16 @@ namespace PSK2025.ApiService.Services
                 return ServiceError.DatabaseError;
             }
         }
-        public async Task<ServiceError> SetPickupTimeAsync(Guid userId, DateTime pickupTime)
+        public async Task<ServiceError> UpdateCartAsync(Guid userId, DateTime pickupTime, CartStatus status)
         {
-            var (cart, error) = await _cartRepository.GetOrCreateCartAsync(userId);
-            if (error != ServiceError.None || cart == null) return ServiceError.NotFound;
+            var cart = await _cartRepository.GetCartAsync(userId);
+
+            if (cart == null) return ServiceError.NotFound;
+
             cart.PickupTime = pickupTime;
-            cart.Status = CartStatus.Completed;
+            cart.Status = status;
             cart.UpdatedAt = DateTime.UtcNow;
+
             await _cartRepository.UpdateCartAsync(cart);
             return ServiceError.None;
         }

@@ -13,6 +13,5 @@ namespace PSK2025.Data.Repositories.Interfaces
         Task UpdateCartAsync(Cart cart);
         Task<bool> RemoveItemFromCartAsync(Guid cartId, Guid itemId);
         Task SaveChangesAsync();
-        Task<(Cart cart, ServiceError error)> GetOrCreateCartAsync(Guid userId);
     }
 }

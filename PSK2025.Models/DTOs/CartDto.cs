@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PSK2025.Models.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +13,7 @@ namespace PSK2025.Models.DTOs
         public Guid UserId { get; set; }
 
         public DateTime? PickupTime { get; set; }
-
+        public CartStatus Status { get; set; }
         public List<CartItemDto> Items { get; set; } = new();
     }
 }

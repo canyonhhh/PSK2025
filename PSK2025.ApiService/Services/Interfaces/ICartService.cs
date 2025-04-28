@@ -10,6 +10,6 @@ namespace PSK2025.ApiService.Services.Interfaces
         Task<ServiceError> AddItemToCartAsync(Guid userId, Guid itemId, int quantity);
         Task<ServiceError> UpdateCartItemAsync(Guid userId, Guid itemId, int quantity);
         Task<ServiceError> DeleteCartItemAsync(Guid userId, Guid itemId);
-        Task<ServiceError> SetPickupTimeAsync(Guid userId, DateTime pickupTime);
+        Task<ServiceError> UpdateCartAsync(Guid userId, DateTime pickupTime, CartStatus status);
     }
 }
