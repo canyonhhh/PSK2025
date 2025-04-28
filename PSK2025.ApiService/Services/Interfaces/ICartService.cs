@@ -10,5 +10,7 @@ namespace PSK2025.ApiService.Services.Interfaces
         Task<ServiceError> AddItemToCartAsync(Guid userId, Guid itemId, int quantity);
         Task<ServiceError> UpdateCartItemAsync(Guid userId, Guid itemId, int quantity);
         Task<ServiceError> DeleteCartItemAsync(Guid userId, Guid itemId);
+        Task<ServiceError> CheckoutCartAsync(Guid userId, DateTime pickupTime);
+
     }
 }

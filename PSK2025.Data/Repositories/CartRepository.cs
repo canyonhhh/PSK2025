@@ -2,6 +2,7 @@
 using PSK2025.Data.Contexts;
 using PSK2025.Data.Repositories.Interfaces;
 using PSK2025.Models.Entities;
+using PSK2025.Models.Enums;
 
 public class CartRepository : ICartRepository
 {
@@ -85,6 +86,17 @@ public class CartRepository : ICartRepository
 
         return true;
     }
+
+    public async Task<(Cart cart, ServiceError error)> GetOrCreateCartAsync(Guid userId)
+    {
+        var cart = await GetCartAsync(userId);
+        if (cart != null) return (cart, ServiceError.None);
+        cart = new Cart { Id = Guid.NewGuid(), UserId = userId, Status = CartStatus.Active, CreatedAt = DateTime.UtcNow };
+        _dbContext.Carts.Add(cart);
+        await _dbContext.SaveChangesAsync();
+        return (cart, ServiceError.None);
+    }
+
 
     public async Task SaveChangesAsync()
     {

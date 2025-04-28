@@ -1,5 +1,6 @@
 ﻿using PSK2025.Data.Migrations;
 using PSK2025.Models.Entities;
+using PSK2025.Models.Enums;
 
 namespace PSK2025.Data.Repositories.Interfaces
 {
@@ -12,5 +13,6 @@ namespace PSK2025.Data.Repositories.Interfaces
         Task UpdateCartAsync(Cart cart);
         Task<bool> RemoveItemFromCartAsync(Guid cartId, Guid itemId);
         Task SaveChangesAsync();
+        Task<(Cart cart, ServiceError error)> GetOrCreateCartAsync(Guid userId);
     }
 }

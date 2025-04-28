@@ -82,6 +82,16 @@ namespace PSK2025.ApiService.Controllers
             return StatusCode(error.GetStatusCode(), error.GetErrorMessage("Cart Item"));
         }
 
+        [HttpPost("checkout")]
+        public async Task<IActionResult> Checkout([FromBody] CheckoutCartDto model)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            var userId = GetUserIdFromToken();
+            var error = await _cartService.CheckoutCartAsync(userId, model.PickupTime);
+            if (error == ServiceError.None) return Ok();
+            return StatusCode(error.GetStatusCode(), error.GetErrorMessage("Cart"));
+        }
+
         [HttpDelete("delete")]
         public async Task<IActionResult> DeleteCartItem([FromQuery] Guid itemId)
         {
