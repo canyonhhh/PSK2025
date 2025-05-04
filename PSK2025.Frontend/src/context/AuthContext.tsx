@@ -30,7 +30,13 @@ const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
 
   if (token) {
     const decoded = jwtDecode<TokenPayload>(token);
-    role = roleToRoleEnum[decoded.role];
+    if (decoded) {
+      const smt =
+        ((decoded as any)[
+          "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+        ] as string) ?? "";
+      role = roleToRoleEnum[smt];
+    }
   }
 
   const logout = () => {
@@ -41,6 +47,12 @@ const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
   const login = (loginToken: string) => {
     localStorage.setItem(AUTH_TOKEN_KEY, loginToken);
     setToken(loginToken);
+    const decoded = jwtDecode<TokenPayload>(loginToken);
+    const smt =
+      ((decoded as any)[
+        "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+      ] as string) ?? "";
+    role = roleToRoleEnum[smt];
   };
 
   return (
