@@ -1,9 +1,16 @@
 import { createContext, ReactNode, useContext, useState } from "react";
+import { Role, roleToRoleEnum } from "../routing/roles";
+import { jwtDecode } from "jwt-decode";
 
-const AUTH_TOKEN_KEY = "api_auth";
+export const AUTH_TOKEN_KEY = "api_auth";
+
+interface TokenPayload {
+  role: string;
+}
 
 interface AuthContextValues {
   token: string | null;
+  role: Role | null;
   login: (token: string) => void;
   logout: () => void;
 }
@@ -18,6 +25,14 @@ const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
   const [token, setToken] = useState<string | null>(() =>
     localStorage.getItem(AUTH_TOKEN_KEY),
   );
+
+  let role: Role | null = null;
+
+  if (token) {
+    const decoded = jwtDecode<TokenPayload>(token);
+    role = roleToRoleEnum[decoded.role];
+  }
+
   const logout = () => {
     localStorage.removeItem(AUTH_TOKEN_KEY);
     setToken(null);
@@ -29,7 +44,7 @@ const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
   };
 
   return (
-    <AuthContext.Provider value={{ token, logout, login }}>
+    <AuthContext.Provider value={{ token, logout, login, role }}>
       {children}
     </AuthContext.Provider>
   );
