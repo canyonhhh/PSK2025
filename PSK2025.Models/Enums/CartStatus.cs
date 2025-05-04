@@ -8,7 +8,7 @@ namespace PSK2025.Models.Enums
 {
     public enum CartStatus
     {
-        Empty,
+        Inactive,
         Active,
         Completed,
         Cancelled

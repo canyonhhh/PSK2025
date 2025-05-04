@@ -43,16 +43,19 @@ public class CartRepository : ICartRepository
         }
 
         var existingItem = cart.Items.FirstOrDefault(i => i.ItemId == cartItem.ItemId);
-        if (existingItem != null)
+        if(cartItem.Quantity > 0)
         {
-            existingItem.Quantity += cartItem.Quantity; 
+            if (existingItem != null)
+            {
+                existingItem.Quantity = cartItem.Quantity; 
+            }
+            else
+            {
+                cartItem.Id = Guid.Empty;
+                cart.Items.Add(cartItem);
+            }
         }
-        else
-        {
-            cartItem.Id = Guid.Empty;
-            cart.Items.Add(cartItem);
-        }
-
+        
         cart.UpdatedAt = DateTime.UtcNow;
         await _dbContext.SaveChangesAsync();
     }

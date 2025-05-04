@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PSK2025.ApiService.Services;
 using PSK2025.ApiService.Services.Interfaces;
 using PSK2025.Models.DTOs;
 using PSK2025.Models.Enums;
@@ -14,21 +15,19 @@ namespace PSK2025.ApiService.Controllers
     public class CartController : ControllerBase
     {
         private readonly ICartService _cartService;
+        private readonly IGetUserIdService _getUserIdService;
 
-        public CartController(ICartService cartService)
+        public CartController(ICartService cartService, IGetUserIdService getUserIdService)
         {
             _cartService = cartService;
+            _getUserIdService = getUserIdService;
         }
 
         private Guid GetUserIdFromToken()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userIdClaim))
-            {
-                throw new UnauthorizedAccessException("User ID not found in token.");
-            }
-            return Guid.Parse(userIdClaim);
+            return _getUserIdService.GetUserIdFromToken();
         }
+
         [HttpGet("all")]
         [Authorize(Roles = "Manager")]
         public async Task<IActionResult> GetAllCarts()

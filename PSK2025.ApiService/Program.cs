@@ -84,6 +84,9 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICartService, CartService>();
 
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IGetUserIdService, GetUserIdService>();
+
 builder.Services.AddDataSeeders();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 

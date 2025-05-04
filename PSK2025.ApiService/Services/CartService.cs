@@ -97,6 +97,10 @@ namespace PSK2025.ApiService.Services
                 {
                     return ServiceError.NotFound;
                 }
+                if (quantity <= 0)
+                {
+                    return ServiceError.InvalidData;
+                }
 
                 cartItem.Quantity = quantity;
                 cart.UpdatedAt = DateTime.UtcNow;
