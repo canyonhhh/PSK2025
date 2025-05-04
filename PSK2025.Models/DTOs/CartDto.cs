@@ -15,6 +15,6 @@ namespace PSK2025.Models.DTOs
 
         public DateTime? PickupTime { get; set; }
         public CartStatus Status { get; set; }
-        public List<IEnumerable> Items { get; set; } = new();
+        public IEnumerable<CartItemDto>? Items { get; set; }
     }
 }
