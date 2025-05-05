@@ -46,17 +46,23 @@ namespace PSK2025.ApiService.Services
                 cart = await _cartRepository.GetCartAsync(userId)!;
             }
 
-            cart.Items = cart.Items ?? new List<CartItem>();
+            if (cart?.Items == null)
+            {
+                cart!.Items = new List<CartItem>();
+            }
 
             var cartDto = _mapper.Map<CartDto>(cart);
 
-            foreach (var cartItem in cartDto.Items)
+            if (cartDto.Items != null)
             {
-                var product = await _productRepository.GetByIdAsync(cartItem.ItemId);
-                if (product != null)
+                foreach (var cartItem in cartDto.Items)
                 {
-                    cartItem.ProductName = product.Title;
-                    cartItem.Price = product.Price;
+                    var product = await _productRepository.GetByIdAsync(cartItem.ItemId);
+                    if (product != null)
+                    {
+                        cartItem.ProductName = product.Title;
+                        cartItem.Price = product.Price;
+                    }
                 }
             }
 
