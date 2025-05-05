@@ -11,7 +11,7 @@ module.exports = (env) => {
   return {
     entry: "./src/index.tsx", // ✅ Entry now uses TypeScript
     devServer: {
-      port: env.PORT || 5468,
+      port: Number(env.PORT) || 5468,
       allowedHosts: "all",
       historyApiFallback: true,
       proxy: [
