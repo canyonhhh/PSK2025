@@ -38,15 +38,9 @@ namespace PSK2025.ApiService.Services
             var cart = await _cartRepository.GetCartAsync(userId);
             if (cart == null)
             {
-                cart = new Cart
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    UserId = userId,
-                    Status = CartStatus.Active,
-                    CreatedAt = DateTime.UtcNow,
-                    Items = new List<CartItem>()
-                };
-                await _cartRepository.CreateCartAsync(cart.Id);
+                await _cartRepository.CreateCartAsync(userId);
+
+                cart = await _cartRepository.GetCartAsync(userId)!;
             }
 
             return _mapper.Map<CartDto>(cart);
