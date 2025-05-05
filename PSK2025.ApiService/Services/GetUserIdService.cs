@@ -12,7 +12,7 @@ namespace PSK2025.ApiService.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public Guid GetUserIdFromToken()
+        public String GetUserIdFromToken()
         {
             var userIdClaim = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -21,7 +21,7 @@ namespace PSK2025.ApiService.Services
                 throw new UnauthorizedAccessException("User ID not found in token.");
             }
 
-            return Guid.Parse(userIdClaim);
+            return userIdClaim;
         }
     }
 }

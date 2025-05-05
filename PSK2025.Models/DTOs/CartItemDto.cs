@@ -5,7 +5,7 @@ namespace PSK2025.Models.DTOs
     public class CartItemDto
     {
         [Required]
-        public string? ItemId { get; set; }
+        public string ItemId { get; set; } = string.Empty;
 
         [Range(1, int.MaxValue)]
         public int Quantity { get; set; }

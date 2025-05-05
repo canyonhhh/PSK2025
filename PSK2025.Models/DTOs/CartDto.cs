@@ -10,9 +10,8 @@ namespace PSK2025.Models.DTOs
 {
     public class CartDto
     {
-        public string? Id { get; set; }
-        public string? UserId { get; set; }
-
+        public string Id { get; set; } = Guid.NewGuid().ToString();
+        public string UserId { get; set; } = string.Empty;
         public DateTime? PickupTime { get; set; }
         public CartStatus Status { get; set; }
         public IEnumerable<CartItemDto>? Items { get; set; }

@@ -23,11 +23,6 @@ namespace PSK2025.ApiService.Controllers
             _getUserIdService = getUserIdService;
         }
 
-        private string GetUserIdFromToken()
-        {
-            return _getUserIdService.GetUserIdFromToken().ToString();
-        }
-
         [HttpGet]
         [Authorize(Roles = "Manager")]
         public async Task<IActionResult> GetAllCarts()
@@ -41,7 +36,7 @@ namespace PSK2025.ApiService.Controllers
         }
 
         [HttpGet("active")]
-        [Authorize(Roles = "Client")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> GetActiveCart()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -55,13 +50,13 @@ namespace PSK2025.ApiService.Controllers
         }
 
         [HttpPost("active/items")]
-        [Authorize(Roles = "Client")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> AddItemToActiveCart([FromBody] AddCartItemDto model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var userId = GetUserIdFromToken();
+            var userId = _getUserIdService.GetUserIdFromToken();
             var error = await _cartService.AddItemToCartAsync(userId, model);
 
             if (error == ServiceError.None)
@@ -71,26 +66,26 @@ namespace PSK2025.ApiService.Controllers
         }
 
         [HttpPut("active")]
-        [Authorize(Roles = "Client")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> UpdateActiveCart([FromBody] UpdateCartDto model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var userId = GetUserIdFromToken();
+            var userId = _getUserIdService.GetUserIdFromToken();
             var error = await _cartService.UpdateCartAsync(userId, model);
 
             return error == ServiceError.None ? Ok() : StatusCode(error.GetStatusCode(), error.GetErrorMessage("Cart"));
         }
 
         [HttpPut("active/items/{itemId}")]
-        [Authorize(Roles = "Client")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> UpdateCartItem(string itemId, [FromBody] UpdateCartItemDto model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var userId = GetUserIdFromToken();
+            var userId = _getUserIdService.GetUserIdFromToken();
             var error = await _cartService.UpdateCartItemAsync(userId, model);
 
             if (error == ServiceError.None)
@@ -100,10 +95,10 @@ namespace PSK2025.ApiService.Controllers
         }
 
         [HttpDelete("active/items/{itemId}")]
-        [Authorize(Roles = "Client")]
+        [Authorize(Roles = "Custumer")]
         public async Task<IActionResult> DeleteCartItem(string itemId)
         {
-            var userId = GetUserIdFromToken();
+            var userId = _getUserIdService.GetUserIdFromToken();
             var error = await _cartService.DeleteCartItemAsync(userId, itemId);
 
             if (error == ServiceError.None)
