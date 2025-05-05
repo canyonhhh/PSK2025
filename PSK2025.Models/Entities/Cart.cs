@@ -18,6 +18,6 @@ namespace PSK2025.Models.Entities
 
         public List<CartItem> Items { get; set; } = new();
         // Navigation property
-        public virtual User User { get; set; } = new();
+        public virtual User User { get; set; }
     }
 }

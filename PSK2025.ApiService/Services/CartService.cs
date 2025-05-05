@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.Extensions.Logging;
 using PSK2025.ApiService.Services.Interfaces;
+using PSK2025.Data.Repositories;
 using PSK2025.Data.Repositories.Interfaces;
 using PSK2025.Models.DTOs;
 using PSK2025.Models.Entities;
@@ -11,12 +12,14 @@ namespace PSK2025.ApiService.Services
     public class CartService : ICartService
     {
         private readonly ICartRepository _cartRepository;
+        private readonly IProductRepository _productRepository;
         private readonly IMapper _mapper;
 
-        public CartService(ICartRepository cartRepository, IMapper mapper)
+        public CartService(ICartRepository cartRepository, IMapper mapper, IProductRepository productRepository)
         {
             _cartRepository = cartRepository;
             _mapper = mapper;
+            _productRepository = productRepository;
         }
 
         public async Task<(List<CartDto>, ServiceError)> GetAllCartsAsync()
@@ -43,7 +46,21 @@ namespace PSK2025.ApiService.Services
                 cart = await _cartRepository.GetCartAsync(userId)!;
             }
 
-            return _mapper.Map<CartDto>(cart);
+            cart.Items = cart.Items ?? new List<CartItem>();
+
+            var cartDto = _mapper.Map<CartDto>(cart);
+
+            foreach (var cartItem in cartDto.Items)
+            {
+                var product = await _productRepository.GetByIdAsync(cartItem.ItemId);
+                if (product != null)
+                {
+                    cartItem.ProductName = product.Title;  
+                    cartItem.Price = product.Price;
+                }
+            }
+
+            return cartDto;
         }
 
         public async Task<ServiceError> AddItemToCartAsync(string userId, AddCartItemDto model)

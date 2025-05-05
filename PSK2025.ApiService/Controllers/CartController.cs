@@ -39,7 +39,7 @@ namespace PSK2025.ApiService.Controllers
         [Authorize(Roles = "Customer")]
         public async Task<IActionResult> GetActiveCart()
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = _getUserIdService.GetUserIdFromToken();
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized();
