@@ -16,7 +16,6 @@ namespace PSK2025.Models.Entities
         public DateTime? PickupTime { get; set; }
 
         public List<CartItem> Items { get; set; } = new();
-        // Navigation property
-        public virtual User User { get; set; }
+        public virtual User? User { get; set; }
     }
 }
