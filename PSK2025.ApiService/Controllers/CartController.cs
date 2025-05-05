@@ -95,7 +95,7 @@ namespace PSK2025.ApiService.Controllers
         }
 
         [HttpDelete("active/items/{itemId}")]
-        [Authorize(Roles = "Custumer")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> DeleteCartItem(string itemId)
         {
             var userId = _getUserIdService.GetUserIdFromToken();
