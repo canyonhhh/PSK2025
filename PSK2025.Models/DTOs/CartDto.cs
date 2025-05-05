@@ -10,8 +10,8 @@ namespace PSK2025.Models.DTOs
 {
     public class CartDto
     {
-        public Guid Id { get; set; }
-        public Guid UserId { get; set; }
+        public string? Id { get; set; }
+        public string? UserId { get; set; }
 
         public DateTime? PickupTime { get; set; }
         public CartStatus Status { get; set; }

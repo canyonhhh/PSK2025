@@ -6,10 +6,10 @@ namespace PSK2025.ApiService.Services.Interfaces
     public interface ICartService
     {
         Task<(List<CartDto>, ServiceError)> GetAllCartsAsync();
-        Task<CartDto> GetCartAsync(Guid userId);
-        Task<ServiceError> AddItemToCartAsync(Guid userId, Guid itemId, int quantity);
-        Task<ServiceError> UpdateCartItemAsync(Guid userId, Guid itemId, int quantity);
-        Task<ServiceError> DeleteCartItemAsync(Guid userId, Guid itemId);
-        Task<ServiceError> UpdateCartAsync(Guid userId, DateTime pickupTime, CartStatus status);
+        Task<CartDto> GetCartAsync(string userId);
+        Task<ServiceError> AddItemToCartAsync(string userId, AddCartItemDto model); 
+        Task<ServiceError> UpdateCartItemAsync(string userId, UpdateCartItemDto model);
+        Task<ServiceError> DeleteCartItemAsync(string userId, string itemId);
+        Task<ServiceError> UpdateCartAsync(string userId, UpdateCartDto model); 
     }
 }

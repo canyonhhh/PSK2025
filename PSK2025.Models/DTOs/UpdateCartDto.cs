@@ -8,6 +8,8 @@ namespace PSK2025.Models.DTOs
     {
         [Required]
         public DateTime PickupTime { get; set; }
+
+        [Required]
         public CartStatus Status { get; set; }
     }
 }

@@ -4,11 +4,11 @@ namespace PSK2025.Models.Entities
 {
     public class CartItem
     {
-        public Guid Id { get; set; }
+        public string? Id { get; set; }
         [Required]
-        public Guid CartId { get; set; }
+        public string? CartId { get; set; }
         [Required]
-        public Guid ItemId { get; set; }
+        public string? ItemId { get; set; }
         public int Quantity { get; set; }
     }
 

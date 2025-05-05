@@ -12,26 +12,37 @@ public class CartRepository : ICartRepository
     {
         _dbContext = dbContext;
     }
+
     public async Task<List<Cart>> GetAllCartsAsync()
     {
         return await _dbContext.Carts
             .Include(c => c.Items)
             .ToListAsync();
     }
-    public async Task<Cart?> GetCartAsync(Guid userId)
+
+    public async Task<Cart?> GetCartAsync(string userId)
     {
         return await _dbContext.Carts
-            .Include(c => c.Items) 
+            .Include(c => c.Items)
             .FirstOrDefaultAsync(c => c.UserId == userId);
     }
 
-    public async Task CreateCartAsync(Cart cart)
+    public async Task CreateCartAsync(string userId)
     {
+        var cart = new Cart
+        {
+            UserId = userId,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+            Items = new List<CartItem>()
+        };
+
         await _dbContext.Carts.AddAsync(cart);
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task AddItemToCartAsync(Guid cartId, CartItem cartItem)
+
+    public async Task AddItemToCartAsync(string cartId, CartItem cartItem)
     {
         var cart = await _dbContext.Carts
             .Include(c => c.Items)
@@ -43,19 +54,18 @@ public class CartRepository : ICartRepository
         }
 
         var existingItem = cart.Items.FirstOrDefault(i => i.ItemId == cartItem.ItemId);
-        if(cartItem.Quantity > 0)
+        if (cartItem.Quantity > 0)
         {
             if (existingItem != null)
             {
-                existingItem.Quantity = cartItem.Quantity; 
+                existingItem.Quantity = cartItem.Quantity;
             }
             else
             {
-                cartItem.Id = Guid.Empty;
                 cart.Items.Add(cartItem);
             }
         }
-        
+
         cart.UpdatedAt = DateTime.UtcNow;
         await _dbContext.SaveChangesAsync();
     }
@@ -66,7 +76,7 @@ public class CartRepository : ICartRepository
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<bool> RemoveItemFromCartAsync(Guid cartId, Guid itemId)
+    public async Task<bool> RemoveItemFromCartAsync(string cartId, string itemId)
     {
         var cart = await _dbContext.Carts
             .Include(c => c.Items)
@@ -89,7 +99,6 @@ public class CartRepository : ICartRepository
 
         return true;
     }
-
 
     public async Task SaveChangesAsync()
     {

@@ -7,11 +7,11 @@ namespace PSK2025.Data.Repositories.Interfaces
     public interface ICartRepository
     {
         Task<List<Cart>> GetAllCartsAsync();
-        Task<Cart?> GetCartAsync(Guid userId);
-        Task CreateCartAsync(Cart cart);
-        Task AddItemToCartAsync(Guid cartId, CartItem cartItem);
+        Task<Cart?> GetCartAsync(string userId);
+        Task CreateCartAsync(string cart);
+        Task AddItemToCartAsync(string cartId, CartItem cartItem);
         Task UpdateCartAsync(Cart cart);
-        Task<bool> RemoveItemFromCartAsync(Guid cartId, Guid itemId);
+        Task<bool> RemoveItemFromCartAsync(string cartId, string itemId);
         Task SaveChangesAsync();
     }
 }
