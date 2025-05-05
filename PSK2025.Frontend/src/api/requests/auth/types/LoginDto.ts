@@ -1,5 +1,5 @@
 export interface LoginDto {
-  Email: string;
-  Password: string;
-  RememberMe: boolean;
+  email: string;
+  password: string;
+  rememberMe: boolean;
 }

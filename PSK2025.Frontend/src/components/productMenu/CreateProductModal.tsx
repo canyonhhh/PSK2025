@@ -11,12 +11,11 @@ import {
   Snackbar,
   TextField,
 } from "@mui/material";
-import noProductImage from "../../../no-photos.png";
-import { ProductDto } from "../../../api/types/Product";
+import noProductImage from "../../no-photos.png";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updateProduct } from "../../../api/requests/product/ProductRequests";
-import { UpdateProductDto } from "../../../api/requests/product/types/UpdateProductDto";
-import { keys } from "../../../api/queryKeyFactory";
+import { keys } from "../../api/queryKeyFactory";
+import { CreateProductDto } from "../../api/requests/product/types/CreateProductDto";
+import { createProduct } from "../../api/requests/product/ProductRequests";
 
 const style = {
   position: "absolute",
@@ -31,25 +30,26 @@ const style = {
 
 interface Props {
   open: boolean;
-  product: ProductDto;
-  handleCloseEditModal: () => void;
+  handleCloseCreateModal: () => void;
 }
 
-const ItemEditModal = ({ open, handleCloseEditModal, product }: Props) => {
+const CreateProductModal = ({ open, handleCloseCreateModal }: Props) => {
   const queryClient = useQueryClient();
-  const [image, setImage] = useState(product.photoUrl ?? "");
-  const [name, setName] = useState(product.title ?? "");
-  const [description, setDescription] = useState(product.description ?? "");
-  const [price, setPrice] = useState(product.price);
+  const [image, setImage] = useState("");
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState(0);
   const [toastMessage, setToastMessage] = useState<string | null>();
   const { mutate } = useMutation({
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: keys.allProducts }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.allProducts });
+      handleCloseCreateModal();
+    },
     onError: () => {
       setToastMessage("Failed to update product");
     },
-    mutationFn: (params: { product: UpdateProductDto; id: string }) =>
-      updateProduct(params.product, params.id),
+    mutationFn: (params: { product: CreateProductDto }) =>
+      createProduct(params.product),
   });
 
   const handleCloseToast = () => {
@@ -60,18 +60,17 @@ const ItemEditModal = ({ open, handleCloseEditModal, product }: Props) => {
       product: {
         title: name,
         price: price,
-        isAvailable: product.isAvailable,
+        isAvailable: true,
         description: description,
         photoUrl: image,
       },
-      id: product.id,
     });
   };
   return (
     <div>
       <Modal
         open={open}
-        onClose={handleCloseEditModal}
+        onClose={handleCloseCreateModal}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
@@ -133,7 +132,7 @@ const ItemEditModal = ({ open, handleCloseEditModal, product }: Props) => {
           </Box>
           <Box marginTop="2rem">
             <Button variant="contained" onClick={onUpdate}>
-              Update
+              Create Product
             </Button>
           </Box>
         </Box>
@@ -148,4 +147,4 @@ const ItemEditModal = ({ open, handleCloseEditModal, product }: Props) => {
   );
 };
 
-export default ItemEditModal;
+export default CreateProductModal;
