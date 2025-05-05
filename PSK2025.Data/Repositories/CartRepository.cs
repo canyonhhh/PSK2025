@@ -38,7 +38,7 @@ public class CartRepository : ICartRepository
         };
 
         await _dbContext.Carts.AddAsync(cart);
-        await _dbContext.SaveChangesAsync(); 
+        await _dbContext.SaveChangesAsync();
     }
 
 

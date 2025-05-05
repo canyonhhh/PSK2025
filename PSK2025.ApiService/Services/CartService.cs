@@ -55,7 +55,7 @@ namespace PSK2025.ApiService.Services
                 var product = await _productRepository.GetByIdAsync(cartItem.ItemId);
                 if (product != null)
                 {
-                    cartItem.ProductName = product.Title;  
+                    cartItem.ProductName = product.Title;
                     cartItem.Price = product.Price;
                 }
             }
