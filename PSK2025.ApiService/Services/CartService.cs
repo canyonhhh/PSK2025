@@ -75,7 +75,6 @@ namespace PSK2025.ApiService.Services
                     {
                         Id = Guid.NewGuid().ToString(),
                         UserId = userId,
-                        Status = CartStatus.Active,
                         CreatedAt = DateTime.UtcNow,
                         Items = new List<CartItem>()
                     };
@@ -143,7 +142,6 @@ namespace PSK2025.ApiService.Services
                 }
 
                 cart.PickupTime = model.PickupTime;
-                cart.Status = model.Status;
                 cart.UpdatedAt = DateTime.UtcNow;
 
                 await _cartRepository.UpdateCartAsync(cart);

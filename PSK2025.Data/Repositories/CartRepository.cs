@@ -32,7 +32,6 @@ public class CartRepository : ICartRepository
         var cart = new Cart
         {
             UserId = userId,
-            Status = CartStatus.Active,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
             Items = new List<CartItem>()
