@@ -7,7 +7,7 @@ using System;
 namespace PSK2025.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class pickup : Migration
+    public partial class Pickup : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

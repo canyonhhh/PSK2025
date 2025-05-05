@@ -12,8 +12,8 @@ using PSK2025.Data.Contexts;
 namespace PSK2025.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250505103055_pickup")]
-    partial class pickup
+    [Migration("20250505103055_Pickup")]
+    partial class Pickup
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
