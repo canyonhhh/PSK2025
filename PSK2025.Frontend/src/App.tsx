@@ -23,26 +23,20 @@ function App() {
               <Route path={AppRoutes.LOGIN} element={<LoginPage />} />
               <Route path={AppRoutes.REGISTER} element={<RegisterPage />} />
               <Route element={<RequireAuth />}>
-                <Route element={<RequireRole authorizeFor={Role.MANAGER} />}>
-                  <Route
-                    path={AppRoutes.MANAGER_MENU}
-                    element={<ProductMenu columnCount={1} />}
-                    index
-                  />
-                </Route>
-                <Route element={<RequireRole authorizeFor={Role.BARISTA} />}>
-                  <Route
-                    path={AppRoutes.BARISTA_MENU}
-                    element={<ProductMenu columnCount={1} />}
-                  />
-                </Route>
-                <Route element={<RequireRole authorizeFor={Role.CUSTOMER} />}>
-                  <Route
-                    path={AppRoutes.MENU}
-                    index
-                    element={<ProductMenu columnCount={1} />}
-                  />
-                </Route>
+                <Route
+                  element={<RequireRole authorizeFor={Role.MANAGER} />}
+                ></Route>
+                <Route
+                  element={<RequireRole authorizeFor={Role.BARISTA} />}
+                ></Route>
+                <Route
+                  element={<RequireRole authorizeFor={Role.CUSTOMER} />}
+                ></Route>
+                <Route
+                  path={AppRoutes.MENU}
+                  element={<ProductMenu columnCount={1} />}
+                  index
+                />
                 <Route path={AppRoutes.NOT_FOUND} element={<NotFoundPage />} />
               </Route>
             </Route>

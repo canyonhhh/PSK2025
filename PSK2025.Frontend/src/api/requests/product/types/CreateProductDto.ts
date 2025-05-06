@@ -1,7 +1,7 @@
 export interface CreateProductDto {
-  Title: string;
-  Price: number;
-  PhotoUrl?: string;
-  Description?: string;
-  IsAvailable: boolean;
+  title: string;
+  price: number;
+  photoUrl?: string;
+  description?: string;
+  isAvailable: boolean;
 }

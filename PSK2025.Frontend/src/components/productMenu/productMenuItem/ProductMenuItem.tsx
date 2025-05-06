@@ -30,7 +30,7 @@ const ProductMenuItem = ({ product }: ShopMenuItemProps) => {
   });
 
   const handleConfirmDelete = () => {
-    mutate(product.Id);
+    mutate(product.id);
     setOpen(false);
   };
 
@@ -46,8 +46,6 @@ const ProductMenuItem = ({ product }: ShopMenuItemProps) => {
         </Button>
       );
     } else if (role === Role.MANAGER) {
-      return;
-    } else {
       return (
         <>
           <Button variant="outlined" onClick={handleOpenEditModal}>
@@ -62,6 +60,8 @@ const ProductMenuItem = ({ product }: ShopMenuItemProps) => {
           </Button>
         </>
       );
+    } else {
+      return;
     }
   };
 
@@ -85,17 +85,17 @@ const ProductMenuItem = ({ product }: ShopMenuItemProps) => {
                 maxHeight: { xs: 233, md: 167 },
                 maxWidth: { xs: 300, md: 250 },
               }}
-              src={product.PhotoUrl ?? noProductImage}
+              src={product.photoUrl ?? noProductImage}
             />
           </Box>
         </Box>
         <Box flexGrow={1}>
           <Box marginBottom="3rem">
             <Box marginBottom="1rem">
-              <Typography variant="h5">{product.Title}</Typography>
-              <Typography variant="subtitle2">{product.Price} €</Typography>
+              <Typography variant="h5">{product.title}</Typography>
+              <Typography variant="subtitle2">{product.price} €</Typography>
             </Box>
-            <Typography variant="body1">{product.Description}</Typography>
+            <Typography variant="body1">{product.description}</Typography>
           </Box>
           <Box display="flex" gap="1rem">
             {renderActionButtons()}

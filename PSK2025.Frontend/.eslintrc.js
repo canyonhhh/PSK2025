@@ -23,9 +23,10 @@ module.exports = {
     es6: true,
   },
   rules: {
-    'react/react-in-jsx-scope': 'off',
-    '@typescript-eslint/no-unused-vars': 'warn',
-    'react/prop-types': 'off',
+    "react/react-in-jsx-scope": "off",
+    "@typescript-eslint/no-unused-vars": "warn",
+    "react/prop-types": "off",
+    "linebreak-style": ["error", "unix"],
   },
   settings: {
     react: {

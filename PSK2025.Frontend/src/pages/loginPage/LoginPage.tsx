@@ -99,9 +99,9 @@ export default function LoginPage() {
       return;
     }
     request.mutate({
-      Email: email,
-      Password: password,
-      RememberMe: isRememberMeChecked,
+      email: email,
+      password: password,
+      rememberMe: isRememberMeChecked,
     });
   };
 
