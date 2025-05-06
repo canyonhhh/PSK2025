@@ -23,6 +23,10 @@ namespace PSK2025.ApiService.Mappings
             CreateMap<CreateProductDto, Product>();
 
             CreateMap<UpdateProductDto, Product>();
+
+            // Cart mappings
+            CreateMap<CartItem, CartItemDto>();
+            CreateMap<Cart, CartDto>();
         }
     }
 }

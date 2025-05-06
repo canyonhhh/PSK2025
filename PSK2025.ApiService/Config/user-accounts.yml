@@ -10,7 +10,7 @@ users:
     firstName: Regular
     lastName: User
     role: Customer
-    
+
   - email: barista@example.com
     password: BaristaPassword123!
     firstName: Barista

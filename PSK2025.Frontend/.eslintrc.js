@@ -1,22 +1,22 @@
 module.exports = {
-  parser: '@typescript-eslint/parser',
+  parser: "@typescript-eslint/parser",
   parserOptions: {
     ecmaVersion: 2020,
-    sourceType: 'module',
+    sourceType: "module",
     ecmaFeatures: {
       jsx: true,
     },
-    project: './tsconfig.json',
+    project: "./tsconfig.json",
   },
   extends: [
-    'eslint:recommended',
-    'plugin:react/recommended',
-    'plugin:react-hooks/recommended',
-    'plugin:import/recommended',
-    'airbnb-typescript',
-    'plugin:prettier/recommended',
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
+    "plugin:import/recommended",
+    "airbnb-typescript",
+    "plugin:prettier/recommended",
   ],
-  plugins: ['react', 'react-hooks', '@typescript-eslint', 'import', 'prettier'],
+  plugins: ["react", "react-hooks", "@typescript-eslint", "import", "prettier"],
   env: {
     browser: true,
     node: true,
@@ -30,7 +30,7 @@ module.exports = {
   },
   settings: {
     react: {
-      version: 'detect',
+      version: "detect",
     },
   },
 };
