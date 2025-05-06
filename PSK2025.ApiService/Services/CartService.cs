@@ -159,6 +159,32 @@ namespace PSK2025.ApiService.Services
             }
         }
 
+        public async Task<ServiceError> DeleteCartAsync(string userId)
+        {
+            try
+            {
+                var cart = await _cartRepository.GetCartAsync(userId);
+
+                if (cart == null || cart.UserId != userId)
+                {
+                    return ServiceError.NotFound;
+                }
+
+                var deleted = await _cartRepository.DeleteCartAsync(cart.Id);
+
+                if (!deleted)
+                {
+                    return ServiceError.DatabaseError;
+                }
+
+                return ServiceError.None;
+            }
+            catch (Exception)
+            {
+                return ServiceError.DatabaseError;
+            }
+        }
+
         public async Task<ServiceError> DeleteCartItemAsync(string userId, string itemId)
         {
             try

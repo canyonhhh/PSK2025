@@ -27,6 +27,10 @@ namespace PSK2025.ApiService.Mappings
             // Cart mappings
             CreateMap<CartItem, CartItemDto>();
             CreateMap<Cart, CartDto>();
+
+            // Order mappings
+            CreateMap<Order, OrderDto>();
+            CreateMap<OrderItem, OrderItemDto>();
         }
     }
 }

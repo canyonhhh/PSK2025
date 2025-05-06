@@ -10,6 +10,9 @@ namespace PSK2025.Data.Contexts
         public DbSet<Product> Products { get; set; } = null!;
         public DbSet<CartItem> CartItems { get; set; }
         public DbSet<Cart> Carts { get; set; }
+        public DbSet<Order> Orders { get; set; } = null!;
+        public DbSet<OrderItem> OrderItems { get; set; } = null!;
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder); // This is important for Identity tables

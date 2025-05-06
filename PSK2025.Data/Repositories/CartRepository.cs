@@ -76,6 +76,23 @@ public class CartRepository : ICartRepository
         await _dbContext.SaveChangesAsync();
     }
 
+    public async Task<bool> DeleteCartAsync(string userId)
+    {
+        var cart = await _dbContext.Carts
+            .Include(c => c.Items)
+            .FirstOrDefaultAsync(c => c.Id == userId);
+
+        if (cart == null)
+        {
+            return false;
+        }
+
+        _dbContext.Carts.Remove(cart);
+        await _dbContext.SaveChangesAsync();
+
+        return true;
+    }
+
     public async Task<bool> RemoveItemFromCartAsync(string cartId, string itemId)
     {
         var cart = await _dbContext.Carts
