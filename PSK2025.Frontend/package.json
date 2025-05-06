@@ -10,16 +10,18 @@
     "start": "run-script-os",
     "start:win32": "webpack-dev-server --mode development --hot --env PORT=%PORT%",
     "start:default": "webpack-dev-server --mode development --hot --env PORT=$PORT",
-    "lint": "eslint 'src/**/*.{ts,tsx,js,jsx}'",
-    "fix": "eslint 'src/**/*.{ts,tsx,js,jsx}' --fix"
-  },
+    "lint": "eslint \"src/**/*.{ts,tsx,js,jsx}\" --fix",
+    "fix": "eslint \"src/**/*.{ts,tsx,js,jsx}\" --fix"
+ },
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^7.0.2",
     "@mui/material": "^7.0.2",
+    "@mui/utils": "^7.0.2",
     "@tanstack/react-query": "^5.71.10",
     "axios": "^1.8.4",
+    "jwt-decode": "^4.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.5.0"

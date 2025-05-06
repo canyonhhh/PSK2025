@@ -81,7 +81,7 @@ export default function LoginPage() {
   const [open, setOpen] = useState(false);
   const request = useMutation({
     mutationFn: loginRequest,
-    onSuccess: () => onLogin,
+    onSuccess: onLogin,
     onError: () => setLoginError(true),
   });
 
@@ -96,13 +96,12 @@ export default function LoginPage() {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (emailError || passwordError) {
-      event.preventDefault();
       return;
     }
     request.mutate({
-      Email: email,
-      Password: password,
-      RememberMe: isRememberMeChecked,
+      email: email,
+      password: password,
+      rememberMe: isRememberMeChecked,
     });
   };
 
