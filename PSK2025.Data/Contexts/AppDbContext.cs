@@ -15,11 +15,9 @@ namespace PSK2025.Data.Contexts
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder); // This is important for Identity tables
+            base.OnModelCreating(modelBuilder);
 
-            // Apply UTC converter to all DateTime properties
             var dateTimeConverter = DateTimeUtcConverter.Create();
-
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {
                 foreach (var property in entityType.GetProperties())

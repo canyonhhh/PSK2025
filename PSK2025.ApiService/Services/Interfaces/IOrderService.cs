@@ -12,5 +12,6 @@ namespace PSK2025.ApiService.Services.Interfaces
         Task<(OrderDto? Order, ServiceError Error)> UpdateOrderStatusAsync(string id, UpdateOrderStatusDto model);
         Task<ServiceError> DeleteOrderAsync(string id);
         Task<List<OrderDto>> GetUserOrdersSortedAsync(string userId, OrderSortBy sortBy, bool ascending = true);
+        Task<List<OrderDto>> GetOrdersByStatusAsync(OrderStatus orderStatus);
     }
 }

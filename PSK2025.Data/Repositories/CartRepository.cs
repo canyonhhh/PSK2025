@@ -2,123 +2,133 @@
 using PSK2025.Data.Contexts;
 using PSK2025.Data.Repositories.Interfaces;
 using PSK2025.Models.Entities;
-using PSK2025.Models.Enums;
 
-public class CartRepository : ICartRepository
+namespace PSK2025.Data.Repositories
 {
-    private readonly AppDbContext _dbContext;
-
-    public CartRepository(AppDbContext dbContext)
+    public class CartRepository(AppDbContext dbContext) : ICartRepository
     {
-        _dbContext = dbContext;
-    }
+        private readonly AppDbContext _dbContext = dbContext;
 
-    public async Task<List<Cart>> GetAllCartsAsync()
-    {
-        return await _dbContext.Carts
-            .Include(c => c.Items)
-            .ToListAsync();
-    }
-
-    public async Task<Cart?> GetCartAsync(string userId)
-    {
-        return await _dbContext.Carts
-            .Include(c => c.Items)
-            .FirstOrDefaultAsync(c => c.UserId == userId);
-    }
-
-    public async Task CreateCartAsync(string userId)
-    {
-        var cart = new Cart
+        public async Task<List<Cart>> GetAllCartsAsync()
         {
-            UserId = userId,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
-            Items = new List<CartItem>()
-        };
-
-        await _dbContext.Carts.AddAsync(cart);
-        await _dbContext.SaveChangesAsync();
-    }
-
-
-    public async Task AddItemToCartAsync(string cartId, CartItem cartItem)
-    {
-        var cart = await _dbContext.Carts
-            .Include(c => c.Items)
-            .FirstOrDefaultAsync(c => c.Id == cartId);
-
-        if (cart == null)
-        {
-            throw new InvalidOperationException("Cart not found.");
+            return await _dbContext.Carts
+                .Include(c => c.Items)
+                .ThenInclude(i => i.Product)
+                .ToListAsync();
         }
 
-        var existingItem = cart.Items.FirstOrDefault(i => i.ItemId == cartItem.ItemId);
-        if (cartItem.Quantity > 0)
+        public async Task<Cart> GetCartByUserIdAsync(string userId)
         {
-            if (existingItem != null)
+            var cart = await _dbContext.Carts
+                .Include(c => c.Items)
+                .ThenInclude(i => i.Product)
+                .FirstOrDefaultAsync(c => c.UserId == userId);
+
+            if (cart == null)
             {
-                existingItem.Quantity = cartItem.Quantity;
+                cart = new Cart
+                {
+                    UserId = userId,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    Items = [],
+                    User = await _dbContext.Users
+                        .FirstOrDefaultAsync(u => u.Id == userId)
+                };
+
+                _dbContext.Carts.Add(cart);
+                await _dbContext.SaveChangesAsync();
+            }
+
+            return cart;
+        }
+
+        public async Task<CartItem> AddOrUpdateCartItemAsync(string userId, string productId, int quantity)
+        {
+            await GetCartByUserIdAsync(userId);
+
+            var cartItem = await _dbContext.CartItems
+                .FirstOrDefaultAsync(ci => ci.UserId == userId && ci.ProductId == productId);
+
+            if (cartItem == null)
+            {
+                cartItem = new CartItem
+                {
+                    UserId = userId,
+                    ProductId = productId,
+                    Quantity = quantity
+                };
+
+                _dbContext.CartItems.Add(cartItem);
             }
             else
             {
-                cart.Items.Add(cartItem);
+                cartItem.Quantity = quantity;
+                _dbContext.CartItems.Update(cartItem);
+            }
+
+            await UpdateCartTimestampAsync(userId);
+
+            await _dbContext.SaveChangesAsync();
+
+            return await _dbContext.CartItems
+                .Include(ci => ci.Product)
+                .FirstAsync(ci => ci.Id == cartItem.Id);
+        }
+
+        public async Task<bool> RemoveCartItemAsync(string userId, string productId)
+        {
+            var cartItem = await _dbContext.CartItems
+                .FirstOrDefaultAsync(ci => ci.UserId == userId && ci.ProductId == productId);
+
+            if (cartItem == null)
+                return false;
+
+            _dbContext.CartItems.Remove(cartItem);
+
+            await UpdateCartTimestampAsync(userId);
+
+            await _dbContext.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task ClearCartAsync(string userId)
+        {
+            var cartItems = await _dbContext.CartItems
+                .Where(ci => ci.UserId == userId)
+                .ToListAsync();
+
+            if (cartItems.Count != 0)
+            {
+                _dbContext.CartItems.RemoveRange(cartItems);
+
+                var cart = await _dbContext.Carts.FindAsync(userId);
+                if (cart != null)
+                {
+                    cart.UpdatedAt = DateTime.UtcNow;
+                    _dbContext.Carts.Update(cart);
+                }
+
+                await _dbContext.SaveChangesAsync();
             }
         }
 
-        cart.UpdatedAt = DateTime.UtcNow;
-        await _dbContext.SaveChangesAsync();
-    }
-
-    public async Task UpdateCartAsync(Cart cart)
-    {
-        _dbContext.Carts.Update(cart);
-        await _dbContext.SaveChangesAsync();
-    }
-
-    public async Task<bool> DeleteCartAsync(string userId)
-    {
-        var cart = await _dbContext.Carts
-            .Include(c => c.Items)
-            .FirstOrDefaultAsync(c => c.Id == userId);
-
-        if (cart == null)
+        public async Task<CartItem?> GetCartItemAsync(string userId, string productId)
         {
-            return false;
+            return await _dbContext.CartItems
+                .Include(ci => ci.Product)
+                .FirstOrDefaultAsync(ci => ci.UserId == userId && ci.ProductId == productId);
         }
 
-        _dbContext.Carts.Remove(cart);
-        await _dbContext.SaveChangesAsync();
-
-        return true;
-    }
-
-    public async Task<bool> RemoveItemFromCartAsync(string cartId, string itemId)
-    {
-        var cart = await _dbContext.Carts
-            .Include(c => c.Items)
-            .FirstOrDefaultAsync(c => c.Id == cartId);
-
-        if (cart == null)
+        private async Task UpdateCartTimestampAsync(string userId)
         {
-            return false;
+            var cart = await _dbContext.Carts.FindAsync(userId);
+            if (cart != null)
+            {
+                cart.UpdatedAt = DateTime.UtcNow;
+                _dbContext.Carts.Update(cart);
+                await _dbContext.SaveChangesAsync();
+            }
         }
-
-        var item = cart.Items.FirstOrDefault(i => i.ItemId == itemId);
-        if (item == null)
-        {
-            return false;
-        }
-
-        cart.Items.Remove(item);
-        cart.UpdatedAt = DateTime.UtcNow;
-        await _dbContext.SaveChangesAsync();
-
-        return true;
-    }
-
-    public async Task SaveChangesAsync()
-    {
-        await _dbContext.SaveChangesAsync();
     }
 }

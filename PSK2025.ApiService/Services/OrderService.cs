@@ -1,5 +1,4 @@
 using AutoMapper;
-using Microsoft.Extensions.Logging;
 using PSK2025.ApiService.Services.Interfaces;
 using PSK2025.Data.Repositories.Interfaces;
 using PSK2025.Models.DTOs;
@@ -8,27 +7,18 @@ using PSK2025.Models.Enums;
 
 namespace PSK2025.ApiService.Services
 {
-    public class OrderService : IOrderService
+    public class OrderService(
+        IOrderRepository orderRepository,
+        ICartRepository cartRepository,
+        IProductRepository productRepository,
+        IMapper mapper,
+        ILogger<OrderService> logger) : IOrderService
     {
-        private readonly IOrderRepository _orderRepository;
-        private readonly ICartRepository _cartRepository;
-        private readonly IProductRepository _productRepository;
-        private readonly IMapper _mapper;
-        private readonly ILogger<OrderService> _logger;
-
-        public OrderService(
-            IOrderRepository orderRepository,
-            ICartRepository cartRepository,
-            IProductRepository productRepository,
-            IMapper mapper,
-            ILogger<OrderService> logger)
-        {
-            _orderRepository = orderRepository;
-            _cartRepository = cartRepository;
-            _productRepository = productRepository;
-            _mapper = mapper;
-            _logger = logger;
-        }
+        private readonly IOrderRepository _orderRepository = orderRepository;
+        private readonly ICartRepository _cartRepository = cartRepository;
+        private readonly IProductRepository _productRepository = productRepository;
+        private readonly IMapper _mapper = mapper;
+        private readonly ILogger<OrderService> _logger = logger;
 
         public async Task<List<OrderDto>> GetAllOrdersAsync()
         {
@@ -58,72 +48,60 @@ namespace PSK2025.ApiService.Services
         {
             try
             {
-                // Get the cart
-                var cart = await _cartRepository.GetCartAsync(model.CartId);
-                
-                if (cart == null || cart.Items == null || !cart.Items.Any())
+                var cart = await _cartRepository.GetCartByUserIdAsync(userId);
+
+                if (cart == null || cart.Items.Count == 0)
                 {
-                    _logger.LogWarning("Cannot create order: Cart {CartId} not found or empty", model.CartId);
                     return (null, ServiceError.InvalidData);
                 }
 
-                if (cart.UserId != userId)
-                {
-                    _logger.LogWarning("Cannot create order: User {UserId} does not own cart {CartId}", userId, model.CartId);
-                    return (null, ServiceError.Forbidden);
-                }
-
                 decimal totalPrice = 0;
-                var order = new Order
-                {
-                    UserId = userId,
-                    CartId = model.CartId,
-                    ExpectedCompletionTime = model.ExpectedCompletionTime,
-                    Items = new List<OrderItem>()
-                };
+                var orderItems = new List<OrderItem>();
 
-                // Create order items from cart items
                 foreach (var cartItem in cart.Items)
                 {
-                    var product = await _productRepository.GetByIdAsync(cartItem.ItemId);
-                    
+                    var product = await _productRepository.GetByIdAsync(cartItem.ProductId);
                     if (product == null)
                     {
-                        _logger.LogWarning("Product with ID {ProductId} not found", cartItem.ItemId);
                         continue;
                     }
 
+                    totalPrice += product.Price * cartItem.Quantity;
+
                     var orderItem = new OrderItem
                     {
-                        OrderId = order.Id,
                         ProductId = product.Id,
                         ProductName = product.Title,
                         ProductPrice = product.Price,
                         Quantity = cartItem.Quantity
                     };
 
-                    order.Items.Add(orderItem);
-                    totalPrice += product.Price * cartItem.Quantity;
+                    orderItems.Add(orderItem);
                 }
 
-                if (!order.Items.Any())
+                if (orderItems.Count == 0)
                 {
-                    _logger.LogWarning("Cannot create order: No valid items found in cart {CartId}", model.CartId);
                     return (null, ServiceError.InvalidData);
                 }
 
-                order.TotalPrice = totalPrice;
+                var order = new Order
+                {
+                    UserId = userId,
+                    TotalPrice = totalPrice,
+                    CreatedAt = DateTime.UtcNow,
+                    ExpectedCompletionTime = model.ExpectedCompletionTime,
+                    Status = OrderStatus.Pending,
+                    Items = orderItems
+                };
 
-                var createdOrder = await _orderRepository.CreateAsync(order);
-                
-                // Clear the cart after creating the order
-                await _cartRepository.DeleteCartAsync(userId);
+                await _orderRepository.CreateAsync(order);
 
-                return (_mapper.Map<OrderDto>(createdOrder), ServiceError.None);
+                await _cartRepository.ClearCartAsync(userId);
+
+                return (_mapper.Map<OrderDto>(order), ServiceError.None);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                _logger.LogError(ex, "Error creating order for user {UserId}", userId);
                 return (null, ServiceError.DatabaseError);
             }
         }
@@ -140,7 +118,7 @@ namespace PSK2025.ApiService.Services
                 }
 
                 existingOrder.Status = model.Status;
-                
+
                 if (model.Status == OrderStatus.Completed)
                 {
                     existingOrder.CompletedAt = DateTime.UtcNow;
@@ -192,7 +170,21 @@ namespace PSK2025.ApiService.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving sorted orders for user {UserId}", userId);
-                return new List<OrderDto>();
+                return [];
+            }
+        }
+
+        public async Task<List<OrderDto>> GetOrdersByStatusAsync(OrderStatus status)
+        {
+            try
+            {
+                var orders = await _orderRepository.GetOrdersByStatusAsync(status);
+                return _mapper.Map<List<OrderDto>>(orders);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving orders with status {Status}", status);
+                return [];
             }
         }
     }

@@ -24,9 +24,14 @@ namespace PSK2025.ApiService.Mappings
 
             CreateMap<UpdateProductDto, Product>();
 
-            // Cart mappings
-            CreateMap<CartItem, CartItemDto>();
             CreateMap<Cart, CartDto>();
+            CreateMap<CartItem, CartItemDto>()
+                .ForMember(dest => dest.ProductName, opt =>
+                    opt.MapFrom(src => src.Product != null ? src.Product.Title : string.Empty))
+                .ForMember(dest => dest.ProductPrice, opt =>
+                    opt.MapFrom(src => src.Product != null ? src.Product.Price : 0))
+                .ForMember(dest => dest.ProductPhotoUrl, opt =>
+                    opt.MapFrom(src => src.Product != null ? src.Product.PhotoUrl : null));
 
             // Order mappings
             CreateMap<Order, OrderDto>();

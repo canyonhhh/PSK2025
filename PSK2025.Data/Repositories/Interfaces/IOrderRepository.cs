@@ -12,5 +12,6 @@ namespace PSK2025.Data.Repositories.Interfaces
         Task<Order?> UpdateAsync(Order order);
         Task<bool> DeleteAsync(string id);
         Task<List<Order>> GetUserOrdersSortedAsync(string userId, OrderSortBy sortBy, bool ascending = true);
+        Task<List<Order>> GetOrdersByStatusAsync(OrderStatus status);
     }
 }

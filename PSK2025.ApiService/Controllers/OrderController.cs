@@ -32,7 +32,7 @@ namespace PSK2025.ApiService.Controllers
         [HttpGet("user")]
         [Authorize(Roles = "Customer")]
         public async Task<IActionResult> GetUserOrders(
-            [FromQuery] OrderSortBy sortBy = OrderSortBy.CreatedAt, 
+            [FromQuery] OrderSortBy sortBy = OrderSortBy.CreatedAt,
             [FromQuery] bool ascending = false)
         {
             var userId = _getUserIdService.GetUserIdFromToken();
@@ -49,12 +49,11 @@ namespace PSK2025.ApiService.Controllers
 
             if (error == ServiceError.None)
             {
-                // Ensure users can only see their own orders unless they're managers
                 if (order!.UserId != userId && !User.IsInRole("Manager"))
                 {
                     return Forbid();
                 }
-                
+
                 return Ok(order);
             }
 

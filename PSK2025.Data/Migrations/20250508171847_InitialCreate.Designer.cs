@@ -12,7 +12,7 @@ using PSK2025.Data.Contexts;
 namespace PSK2025.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250506160600_InitialCreate")]
+    [Migration("20250508171847_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -159,7 +159,7 @@ namespace PSK2025.Data.Migrations
 
             modelBuilder.Entity("PSK2025.Models.Entities.Cart", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<string>("UserId")
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
@@ -168,16 +168,16 @@ namespace PSK2025.Data.Migrations
                     b.Property<DateTime?>("PickupTime")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("UserId")
+                    b.Property<string>("UserId1")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("Id");
+                    b.HasKey("UserId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId1");
 
                     b.ToTable("Carts");
                 });
@@ -187,20 +187,22 @@ namespace PSK2025.Data.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("text");
 
-                    b.Property<string>("CartId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("ItemId")
+                    b.Property<string>("ProductId")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("CartId");
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("CartItems");
                 });
@@ -433,7 +435,7 @@ namespace PSK2025.Data.Migrations
                 {
                     b.HasOne("PSK2025.Models.Entities.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("UserId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -442,11 +444,21 @@ namespace PSK2025.Data.Migrations
 
             modelBuilder.Entity("PSK2025.Models.Entities.CartItem", b =>
                 {
-                    b.HasOne("PSK2025.Models.Entities.Cart", null)
-                        .WithMany("Items")
-                        .HasForeignKey("CartId")
+                    b.HasOne("PSK2025.Models.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("PSK2025.Models.Entities.Cart", "Cart")
+                        .WithMany("Items")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Cart");
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("PSK2025.Models.Entities.Order", b =>
