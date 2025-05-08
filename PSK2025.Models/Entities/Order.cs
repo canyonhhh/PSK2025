@@ -1,6 +1,6 @@
+using PSK2025.Models.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using PSK2025.Models.Enums;
 
 namespace PSK2025.Models.Entities
 {
