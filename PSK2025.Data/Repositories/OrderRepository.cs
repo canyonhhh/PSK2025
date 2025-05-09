@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using PSK2025.Data.Contexts;
 using PSK2025.Data.Repositories.Interfaces;
+using PSK2025.Models.DTOs;
 using PSK2025.Models.Entities;
 using PSK2025.Models.Enums;
 
@@ -8,21 +9,52 @@ namespace PSK2025.Data.Repositories
 {
     public class OrderRepository(AppDbContext dbContext) : IOrderRepository
     {
-        public async Task<List<Order>> GetAllAsync()
+        public async Task<(List<Order> Orders, int TotalCount)> GetOrdersAsync(
+            string? userId = null,
+            OrderStatus? status = null,
+            OrderSortBy sortBy = OrderSortBy.CreatedAt,
+            bool ascending = false,
+            int page = 1,
+            int pageSize = 10)
         {
-            return await dbContext.Orders
+            var query = dbContext.Orders
                 .Include(o => o.Items)
-                .OrderByDescending(o => o.CreatedAt)
-                .ToListAsync();
-        }
+                .AsQueryable();
 
-        public async Task<List<Order>> GetByUserIdAsync(string userId)
-        {
-            return await dbContext.Orders
-                .Include(o => o.Items)
-                .Where(o => o.UserId == userId)
-                .OrderByDescending(o => o.CreatedAt)
+            if (!string.IsNullOrEmpty(userId))
+            {
+                query = query.Where(o => o.UserId == userId);
+            }
+
+            if (status.HasValue)
+            {
+                query = query.Where(o => o.Status == status.Value);
+            }
+
+            var totalCount = await query.CountAsync();
+
+            query = sortBy switch
+            {
+                OrderSortBy.CreatedAt => ascending
+                    ? query.OrderBy(o => o.CreatedAt)
+                    : query.OrderByDescending(o => o.CreatedAt),
+                OrderSortBy.ExpectedCompletionTime => ascending
+                    ? query.OrderBy(o => o.ExpectedCompletionTime)
+                    : query.OrderByDescending(o => o.ExpectedCompletionTime),
+                OrderSortBy.TotalPrice => ascending
+                    ? query.OrderBy(o => o.Items.Sum(i => i.ProductPrice * i.Quantity))
+                    : query.OrderByDescending(o => o.Items.Sum(i => i.ProductPrice * i.Quantity)),
+                _ => ascending
+                    ? query.OrderBy(o => o.CreatedAt)
+                    : query.OrderByDescending(o => o.CreatedAt)
+            };
+
+            var orders = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
+
+            return (orders, totalCount);
         }
 
         public async Task<Order?> GetByIdAsync(string id)
@@ -35,10 +67,8 @@ namespace PSK2025.Data.Repositories
         public async Task<Order> CreateAsync(Order order)
         {
             order.CreatedAt = DateTime.UtcNow;
-
             await dbContext.Orders.AddAsync(order);
             await dbContext.SaveChangesAsync();
-
             return order;
         }
 
@@ -47,69 +77,27 @@ namespace PSK2025.Data.Repositories
             var existingOrder = await dbContext.Orders
                 .Include(o => o.Items)
                 .FirstOrDefaultAsync(o => o.Id == order.Id);
-
             if (existingOrder == null)
             {
                 return null;
             }
-
             existingOrder.Status = order.Status;
             existingOrder.CompletedAt = order.Status == OrderStatus.Completed ? DateTime.UtcNow : order.CompletedAt;
             existingOrder.ExpectedCompletionTime = order.ExpectedCompletionTime;
-
             await dbContext.SaveChangesAsync();
-
             return existingOrder;
         }
 
         public async Task<bool> DeleteAsync(string id)
         {
             var order = await dbContext.Orders.FindAsync(id);
-
             if (order == null)
             {
                 return false;
             }
-
             dbContext.Orders.Remove(order);
             await dbContext.SaveChangesAsync();
-
             return true;
-        }
-
-        public async Task<List<Order>> GetUserOrdersSortedAsync(string userId, OrderSortBy sortBy, bool ascending = true)
-        {
-            var query = dbContext.Orders
-                .Include(o => o.Items)
-                .Where(o => o.UserId == userId)
-                .AsQueryable();
-
-            query = sortBy switch
-            {
-                OrderSortBy.CreatedAt => ascending
-                    ? query.OrderBy(o => o.CreatedAt)
-                    : query.OrderByDescending(o => o.CreatedAt),
-                OrderSortBy.ExpectedCompletionTime => ascending
-                    ? query.OrderBy(o => o.ExpectedCompletionTime)
-                    : query.OrderByDescending(o => o.ExpectedCompletionTime),
-                OrderSortBy.TotalPrice => ascending
-                    ? query.OrderBy(o => o.TotalPrice)
-                    : query.OrderByDescending(o => o.TotalPrice),
-                _ => ascending
-                    ? query.OrderBy(o => o.CreatedAt)
-                    : query.OrderByDescending(o => o.CreatedAt)
-            };
-
-            return await query.ToListAsync();
-        }
-
-        public async Task<List<Order>> GetOrdersByStatusAsync(OrderStatus status)
-        {
-            return await dbContext.Orders
-                .Include(o => o.Items)
-                .Where(o => o.Status == status)
-                .OrderByDescending(o => o.CreatedAt)
-                .ToListAsync();
         }
     }
 }

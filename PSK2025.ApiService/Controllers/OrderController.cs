@@ -10,35 +10,44 @@ namespace PSK2025.ApiService.Controllers
     [ApiController]
     [Route("[controller]")]
     [Authorize]
-    public class OrderController : ControllerBase
+    public class OrderController(IOrderService orderService, IGetUserIdService getUserIdService) : ControllerBase
     {
-        private readonly IOrderService _orderService;
-        private readonly IGetUserIdService _getUserIdService;
+        private readonly IOrderService _orderService = orderService;
+        private readonly IGetUserIdService _getUserIdService = getUserIdService;
 
-        public OrderController(IOrderService orderService, IGetUserIdService getUserIdService)
-        {
-            _orderService = orderService;
-            _getUserIdService = getUserIdService;
-        }
 
         [HttpGet]
-        [Authorize(Roles = "Manager")]
-        public async Task<IActionResult> GetAllOrders()
+        [Authorize]
+        public async Task<IActionResult> GetOrders(
+            [FromQuery] string? userId = null,
+            [FromQuery] OrderStatus? status = null,
+            [FromQuery] OrderSortBy sortBy = OrderSortBy.CreatedAt,
+            [FromQuery] bool ascending = false,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
         {
-            var orders = await _orderService.GetAllOrdersAsync();
-            return Ok(orders);
+            if (userId != null && User.IsInRole("User") &&
+                userId != _getUserIdService.GetUserIdFromToken())
+            {
+                return Forbid();
+            }
+
+            if (userId == null && User.IsInRole("User"))
+            {
+                userId = _getUserIdService.GetUserIdFromToken();
+            }
+
+            var result = await _orderService.GetOrdersAsync(
+                userId,
+                status,
+                sortBy,
+                ascending,
+                page,
+                pageSize);
+
+            return Ok(result);
         }
 
-        [HttpGet("user")]
-        [Authorize(Roles = "Customer")]
-        public async Task<IActionResult> GetUserOrders(
-            [FromQuery] OrderSortBy sortBy = OrderSortBy.CreatedAt,
-            [FromQuery] bool ascending = false)
-        {
-            var userId = _getUserIdService.GetUserIdFromToken();
-            var orders = await _orderService.GetUserOrdersSortedAsync(userId, sortBy, ascending);
-            return Ok(orders);
-        }
 
         [HttpGet("{id}")]
         [Authorize]

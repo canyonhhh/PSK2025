@@ -12,7 +12,8 @@ namespace PSK2025.Models.Entities
         [Required]
         public string UserId { get; set; } = string.Empty;
 
-        public decimal TotalPrice { get; set; }
+        [NotMapped]
+        public decimal TotalPrice => Items?.Sum(item => item.ProductPrice * item.Quantity) ?? 0;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

@@ -218,9 +218,6 @@ namespace PSK2025.Data.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
-                    b.Property<decimal>("TotalPrice")
-                        .HasColumnType("numeric");
-
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("text");

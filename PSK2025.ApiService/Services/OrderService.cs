@@ -20,16 +20,43 @@ namespace PSK2025.ApiService.Services
         private readonly IMapper _mapper = mapper;
         private readonly ILogger<OrderService> _logger = logger;
 
-        public async Task<List<OrderDto>> GetAllOrdersAsync()
+        public async Task<PaginatedResult<OrderDto>> GetOrdersAsync(
+            string? userId = null,
+            OrderStatus? status = null,
+            OrderSortBy sortBy = OrderSortBy.CreatedAt,
+            bool ascending = false,
+            int page = 1,
+            int pageSize = 10)
         {
-            var orders = await _orderRepository.GetAllAsync();
-            return _mapper.Map<List<OrderDto>>(orders);
-        }
+            try
+            {
+                page = Math.Max(1, page);
+                pageSize = Math.Clamp(pageSize, 1, 50);
 
-        public async Task<List<OrderDto>> GetUserOrdersAsync(string userId)
-        {
-            var orders = await _orderRepository.GetByUserIdAsync(userId);
-            return _mapper.Map<List<OrderDto>>(orders);
+                var (orders, totalCount) = await _orderRepository.GetOrdersAsync(
+                    userId, status, sortBy, ascending, page, pageSize);
+
+                var orderDtos = _mapper.Map<List<OrderDto>>(orders);
+
+                return new PaginatedResult<OrderDto>
+                {
+                    Items = orderDtos,
+                    TotalCount = totalCount,
+                    CurrentPage = page,
+                    PageSize = pageSize
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving orders");
+                return new PaginatedResult<OrderDto>
+                {
+                    Items = new List<OrderDto>(),
+                    TotalCount = 0,
+                    CurrentPage = page,
+                    PageSize = pageSize
+                };
+            }
         }
 
         public async Task<(OrderDto? Order, ServiceError Error)> GetOrderByIdAsync(string id)
@@ -55,7 +82,6 @@ namespace PSK2025.ApiService.Services
                     return (null, ServiceError.InvalidData);
                 }
 
-                decimal totalPrice = 0;
                 var orderItems = new List<OrderItem>();
 
                 foreach (var cartItem in cart.Items)
@@ -65,8 +91,6 @@ namespace PSK2025.ApiService.Services
                     {
                         continue;
                     }
-
-                    totalPrice += product.Price * cartItem.Quantity;
 
                     var orderItem = new OrderItem
                     {
@@ -87,7 +111,6 @@ namespace PSK2025.ApiService.Services
                 var order = new Order
                 {
                     UserId = userId,
-                    TotalPrice = totalPrice,
                     CreatedAt = DateTime.UtcNow,
                     ExpectedCompletionTime = model.ExpectedCompletionTime,
                     Status = OrderStatus.Pending,
@@ -100,8 +123,9 @@ namespace PSK2025.ApiService.Services
 
                 return (_mapper.Map<OrderDto>(order), ServiceError.None);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Error creating order for user {UserId}", userId);
                 return (null, ServiceError.DatabaseError);
             }
         }
@@ -157,34 +181,6 @@ namespace PSK2025.ApiService.Services
             {
                 _logger.LogError(ex, "Error deleting order with ID {OrderId}", id);
                 return ServiceError.DatabaseError;
-            }
-        }
-
-        public async Task<List<OrderDto>> GetUserOrdersSortedAsync(string userId, OrderSortBy sortBy, bool ascending = true)
-        {
-            try
-            {
-                var orders = await _orderRepository.GetUserOrdersSortedAsync(userId, sortBy, ascending);
-                return _mapper.Map<List<OrderDto>>(orders);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving sorted orders for user {UserId}", userId);
-                return [];
-            }
-        }
-
-        public async Task<List<OrderDto>> GetOrdersByStatusAsync(OrderStatus status)
-        {
-            try
-            {
-                var orders = await _orderRepository.GetOrdersByStatusAsync(status);
-                return _mapper.Map<List<OrderDto>>(orders);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving orders with status {Status}", status);
-                return [];
             }
         }
     }
