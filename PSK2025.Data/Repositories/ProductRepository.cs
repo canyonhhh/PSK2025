@@ -7,9 +7,18 @@ namespace PSK2025.Data.Repositories
 {
     public class ProductRepository(AppDbContext dbContext) : IProductRepository
     {
-        public async Task<List<Product>> GetAllAsync()
+        public async Task<(List<Product> Products, int TotalCount)> GetAllAsync(int page = 1, int pageSize = 10)
         {
-            return await dbContext.Products.ToListAsync();
+            var query = dbContext.Products.AsQueryable();
+
+            var totalCount = await query.CountAsync();
+
+            var products = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (products, totalCount);
         }
 
         public async Task<Product?> GetByIdAsync(string id)

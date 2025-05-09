@@ -1,5 +1,4 @@
 using AutoMapper;
-using Microsoft.Extensions.Logging;
 using PSK2025.ApiService.Services.Interfaces;
 using PSK2025.Data.Repositories.Interfaces;
 using PSK2025.Models.DTOs;
@@ -10,10 +9,21 @@ namespace PSK2025.ApiService.Services
 {
     public class ProductService(IProductRepository productRepository, IMapper mapper, ILogger<IProductService> logger) : IProductService
     {
-        public async Task<List<ProductDto>> GetAllProductsAsync()
+        public async Task<PaginatedResult<ProductDto>> GetAllProductsAsync(int page = 1, int pageSize = 10)
         {
-            var products = await productRepository.GetAllAsync();
-            return mapper.Map<List<ProductDto>>(products);
+            page = Math.Max(1, page);
+            pageSize = Math.Clamp(pageSize, 1, 50);
+
+            var (products, totalCount) = await productRepository.GetAllAsync(page, pageSize);
+            var productDtos = mapper.Map<List<ProductDto>>(products);
+
+            return new PaginatedResult<ProductDto>
+            {
+                Items = productDtos,
+                TotalCount = totalCount,
+                CurrentPage = page,
+                PageSize = pageSize
+            };
         }
 
         public async Task<(ProductDto? Product, ServiceError Error)> GetProductByIdAsync(string id)

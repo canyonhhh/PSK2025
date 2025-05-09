@@ -1,16 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PSK2025.ApiService.Services;
 using PSK2025.ApiService.Services.Interfaces;
 using PSK2025.Models.DTOs;
 using PSK2025.Models.Enums;
 using PSK2025.Models.Extensions;
-using System.Security.Claims;
 
 namespace PSK2025.ApiService.Controllers
 {
     [ApiController]
-    [Route("cart")]
+    [Route("[controller]")]
     [Authorize]
     public class CartController : ControllerBase
     {
@@ -24,34 +22,17 @@ namespace PSK2025.ApiService.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Manager")]
-        public async Task<IActionResult> GetAllCarts()
-        {
-            var (carts, error) = await _cartService.GetAllCartsAsync();
-
-            if (error == ServiceError.None)
-                return Ok(carts);
-
-            return StatusCode(error.GetStatusCode(), error.GetErrorMessage("Carts"));
-        }
-
-        [HttpGet("active")]
         [Authorize(Roles = "Customer")]
-        public async Task<IActionResult> GetActiveCart()
+        public async Task<IActionResult> GetCart()
         {
             var userId = _getUserIdService.GetUserIdFromToken();
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized();
-            }
-
             var cart = await _cartService.GetCartAsync(userId);
             return Ok(cart);
         }
 
-        [HttpPost("active/items")]
+        [HttpPost("items")]
         [Authorize(Roles = "Customer")]
-        public async Task<IActionResult> AddItemToActiveCart([FromBody] AddCartItemDto model)
+        public async Task<IActionResult> AddItem([FromBody] AddCartItemDto model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -65,22 +46,9 @@ namespace PSK2025.ApiService.Controllers
             return StatusCode(error.GetStatusCode(), error.GetErrorMessage("Cart Item"));
         }
 
-        [HttpPut("active")]
+        [HttpPut("items")]
         [Authorize(Roles = "Customer")]
-        public async Task<IActionResult> UpdateActiveCart([FromBody] UpdateCartDto model)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var userId = _getUserIdService.GetUserIdFromToken();
-            var error = await _cartService.UpdateCartAsync(userId, model);
-
-            return error == ServiceError.None ? Ok() : StatusCode(error.GetStatusCode(), error.GetErrorMessage("Cart"));
-        }
-
-        [HttpPut("active/items/{itemId}")]
-        [Authorize(Roles = "Customer")]
-        public async Task<IActionResult> UpdateCartItem(string itemId, [FromBody] UpdateCartItemDto model)
+        public async Task<IActionResult> UpdateItem([FromBody] UpdateCartItemDto model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -94,18 +62,30 @@ namespace PSK2025.ApiService.Controllers
             return StatusCode(error.GetStatusCode(), error.GetErrorMessage("Cart Item"));
         }
 
-        [HttpDelete("active/items/{itemId}")]
+        [HttpDelete("items/{productId}")]
         [Authorize(Roles = "Customer")]
-        public async Task<IActionResult> DeleteCartItem(string itemId)
+        public async Task<IActionResult> RemoveItem(string productId)
         {
             var userId = _getUserIdService.GetUserIdFromToken();
-            var error = await _cartService.DeleteCartItemAsync(userId, itemId);
+            var error = await _cartService.RemoveCartItemAsync(userId, productId);
 
             if (error == ServiceError.None)
                 return NoContent();
 
             return StatusCode(error.GetStatusCode(), error.GetErrorMessage("Cart Item"));
         }
-    }
 
+        [HttpDelete("items")]
+        [Authorize(Roles = "Customer")]
+        public async Task<IActionResult> ClearItems()
+        {
+            var userId = _getUserIdService.GetUserIdFromToken();
+            var error = await _cartService.ClearCartAsync(userId);
+
+            if (error == ServiceError.None)
+                return NoContent();
+
+            return StatusCode(error.GetStatusCode(), error.GetErrorMessage("Cart"));
+        }
+    }
 }
