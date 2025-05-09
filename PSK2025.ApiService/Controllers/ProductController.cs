@@ -12,10 +12,10 @@ namespace PSK2025.ApiService.Controllers
     public class ProductController(IProductService productService) : ControllerBase
     {
         [HttpGet]
-        public async Task<IActionResult> GetAllProducts()
+        public async Task<IActionResult> GetAllProducts([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
-            var products = await productService.GetAllProductsAsync();
-            return Ok(products);
+            var paginatedProducts = await productService.GetAllProductsAsync(page, pageSize);
+            return Ok(paginatedProducts);
         }
 
         [HttpGet("{id}")]

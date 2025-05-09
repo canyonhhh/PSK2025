@@ -26,13 +26,13 @@ namespace PSK2025.ApiService.Controllers
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10)
         {
-            if (userId != null && User.IsInRole("User") &&
+            if (userId != null && User.IsInRole("Customer") &&
                 userId != _getUserIdService.GetUserIdFromToken())
             {
                 return Forbid();
             }
 
-            if (userId == null && User.IsInRole("User"))
+            if (userId == null && User.IsInRole("Customer"))
             {
                 userId = _getUserIdService.GetUserIdFromToken();
             }
