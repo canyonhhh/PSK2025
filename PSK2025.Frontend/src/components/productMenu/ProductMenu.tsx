@@ -19,28 +19,32 @@ import { useAuthContext } from "../../context/AuthContext";
 import { Role } from "../../routing/roles";
 import CreateProductModal from "./CreateProductModal";
 
+const SIZE_PER_PAGE = 16;
+
 interface ManagerMenuProps {
     columnCount: number;
 }
 
 export function ProductMenu({ columnCount }: ManagerMenuProps) {
     const { role } = useAuthContext();
-    let { data: rows, isFetching } = useQuery({
+    const [pageCount, _setPageCount] = useState(1);
+    let { data: paginatedRows, isFetching } = useQuery({
         queryKey: keys.allProducts,
-        queryFn: fetchAllProducts,
+        queryFn: () => fetchAllProducts(pageCount, SIZE_PER_PAGE),
     });
 
     const [filterString, setFilterString] = useState<string>("");
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-    if (!isFetching && !rows) {
+    if (!isFetching && !paginatedRows) {
         return <Alert severity="error">Failed to retrieve Menu Items</Alert>;
     }
 
-    if (isFetching || !rows) {
+    if (isFetching || !paginatedRows) {
         return <CircularProgress />;
     }
 
+    const rows = paginatedRows?.items;
     let filteredProducts: ProductDto[];
     if (!filterString) {
         filteredProducts = rows;

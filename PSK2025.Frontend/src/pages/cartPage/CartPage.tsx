@@ -19,6 +19,7 @@ const CartPage = () => {
     if (!isFetching || isError || !cart) {
         return <Alert severity="error">Failed to retrieve Menu Items</Alert>;
     }
+
     return (
         <Box display="flex" gap="4">
             <Box flex="4">

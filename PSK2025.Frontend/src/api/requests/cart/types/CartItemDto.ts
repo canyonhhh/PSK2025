@@ -2,7 +2,7 @@ export interface CartItemDto {
     itemId: string;
     quantity: number;
     productName: string | undefined;
-    price: number;
+    ProductPrice: number;
     description?: string;
     imageUrl?: string;
 }

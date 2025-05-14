@@ -19,6 +19,7 @@ function App() {
         <AuthContextProvider>
             <QueryClientProvider client={queryClient}>
                 <BrowserRouter>
+                    <Route path={"/carts"} element={<CartPage />} />
                     <Routes>
                         <Route element={<NavigationLayout />}>
                             <Route path={"/cart"} element={<CartPage />} />

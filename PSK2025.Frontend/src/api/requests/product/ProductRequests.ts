@@ -1,4 +1,5 @@
 import api from "../../api";
+import { PaginatedResponse } from "../../types/PaginatedResposeDto";
 import { ProductDto } from "../../types/Product";
 import { CreateProductDto } from "./types/CreateProductDto";
 import { UpdateProductDto } from "./types/UpdateProductDto";
@@ -6,8 +7,13 @@ import { UpdateProductDto } from "./types/UpdateProductDto";
 const CONTROLLER = "/Product";
 
 // TODO: Add error handling
-export const fetchAllProducts = async (): Promise<ProductDto[]> => {
-    const response = await api.get<ProductDto[]>(CONTROLLER);
+export const fetchAllProducts = async (
+    page: number,
+    itemPerPage: number,
+): Promise<PaginatedResponse<ProductDto>> => {
+    const response = await api.get<PaginatedResponse<ProductDto>>(
+        `${CONTROLLER}?page=${page}&pageSize=${itemPerPage}`,
+    );
     return response.data;
 };
 
