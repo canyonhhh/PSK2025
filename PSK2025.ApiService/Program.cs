@@ -11,9 +11,26 @@ using PSK2025.Data.Repositories;
 using PSK2025.Data.Repositories.Interfaces;
 using PSK2025.Data.Seed;
 using PSK2025.Models.Entities;
+using PSK2025.ServiceDefaults;
+using Serilog;
+using Serilog.Events;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure Serilog
+builder.Host.UseSerilog((context, services, configuration) => configuration
+    .ReadFrom.Configuration(context.Configuration)
+    .ReadFrom.Services(services)
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    .MinimumLevel.Override("System", LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File(
+        path: "logs/business-operations-.log",
+        rollingInterval: RollingInterval.Day,
+        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}{NewLine}"));
 
 builder.Configuration.AddYamlFile("Config/user-accounts.yml", optional: false, reloadOnChange: true);
 
@@ -67,6 +84,9 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+// Add HttpContextAccessor (required for our interceptor)
+builder.Services.AddHttpContextAccessor();
+
 // Add Authorization
 builder.Services.AddAuthorization();
 
@@ -86,8 +106,12 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 
-builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IGetUserIdService, GetUserIdService>();
+
+builder.Services.AddBusinessOperationLogging(interfaceType =>
+    interfaceType.Name.StartsWith("I") &&
+    interfaceType.Namespace != null &&
+    interfaceType.Namespace.Contains("Services.Interfaces"));
 
 builder.Services.AddDataSeeders();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
