@@ -1,7 +1,7 @@
-using System.Security.Claims;
 using Castle.DynamicProxy;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using System.Security.Claims;
 
 namespace PSK2025.ServiceDefaults.Interceptors
 {
