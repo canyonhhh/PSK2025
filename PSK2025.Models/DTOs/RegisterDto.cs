@@ -16,5 +16,8 @@ namespace PSK2025.Models.DTOs
 
         [Required]
         public string LastName { get; set; } = string.Empty;
+
+        [Required]
+        public string PhoneNumber { get; set; } = string.Empty;
     }
 }
