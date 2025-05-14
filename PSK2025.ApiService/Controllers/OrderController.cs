@@ -10,11 +10,11 @@ namespace PSK2025.ApiService.Controllers
     [ApiController]
     [Route("[controller]")]
     [Authorize]
-    public class OrderController(IOrderService orderService, IGetUserIdService getUserIdService) : ControllerBase
+    public class OrderController(IOrderService orderService, IGetUserIdService getUserIdService, IAppSettingsService appSettingsService) : ControllerBase
     {
         private readonly IOrderService _orderService = orderService;
         private readonly IGetUserIdService _getUserIdService = getUserIdService;
-
+        private readonly IAppSettingsService _appSettingsService = appSettingsService;
 
         [HttpGet]
         [Authorize]
@@ -75,6 +75,13 @@ namespace PSK2025.ApiService.Controllers
         [Authorize(Roles = "Customer")]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDto model)
         {
+            var (paused, pauseError) = await _appSettingsService.GetOrderingStatusAsync();
+            if (pauseError == ServiceError.Disabled)
+                return StatusCode(
+                    pauseError.GetStatusCode(),
+                    new { message = pauseError.GetErrorMessage("ordering") }
+                );
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);

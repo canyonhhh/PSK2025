@@ -77,6 +77,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IAppSettingsRepository, AppSettingsRepository>();
 
 // Register services
 builder.Services.AddScoped<IRandomNumberService, RandomNumberService>();
@@ -85,6 +86,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IAppSettingsService, AppSettingsService>();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IGetUserIdService, GetUserIdService>();
