@@ -9,7 +9,7 @@ namespace PSK2025.Models.Entities
 {
     public class AppSettings
     {
-        [Key] public int Id { get; set; }           
+        [Key] public int Id { get; set; }
         public bool OrderingPaused { get; set; } = false;
         // ateityje galetu butu daugiau flagu, kaip MaintenenaceMode, etc.
     }

@@ -75,12 +75,15 @@ namespace PSK2025.ApiService.Controllers
         [Authorize(Roles = "Customer")]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDto model)
         {
-            var (paused, pauseError) = await _appSettingsService.GetOrderingStatusAsync();
-            if (pauseError == ServiceError.Disabled)
+            var (paused, statusError) = await _appSettingsService.GetOrderingStatusAsync();
+
+            if (paused)
+            {
                 return StatusCode(
-                    pauseError.GetStatusCode(),
-                    new { message = pauseError.GetErrorMessage("ordering") }
+                    ServiceError.Disabled.GetStatusCode(),
+                    new { message = ServiceError.Disabled.GetErrorMessage("ordering") }
                 );
+            }
 
             if (!ModelState.IsValid)
             {
