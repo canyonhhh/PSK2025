@@ -12,80 +12,84 @@ import { Role } from "../routing/roles";
 import { AppRoutes } from "../routing/appRoutes";
 
 export function NavigationLayout() {
-  const { role, logout } = useAuthContext();
+    const { role, logout } = useAuthContext();
 
-  if (!role) {
+    if (!role) {
+        return (
+            <Box maxWidth="1200px" margin="1rem auto">
+                <Outlet />
+            </Box>
+        );
+    }
+
+    const renderContent = () => {
+        if (role === Role.MANAGER || role === Role.BARISTA) {
+            return (
+                <span>
+                    <IconButton
+                        size="large"
+                        aria-label="account of current user"
+                        aria-controls="menu-appbar"
+                        aria-haspopup="true"
+                        color="inherit"
+                        onClick={logout}
+                    >
+                        <Link to={AppRoutes.LOGIN}>
+                            <LogoutIcon />
+                        </Link>
+                    </IconButton>
+                </span>
+            );
+        }
+        if (role === Role.CUSTOMER) {
+            return (
+                <span>
+                    <IconButton
+                        size="large"
+                        aria-label="account of current user"
+                        aria-controls="menu-appbar"
+                        aria-haspopup="true"
+                        color="inherit"
+                        onClick={logout}
+                    >
+                        <Link to={AppRoutes.CART}>
+                            <ShoppingCartIcon />
+                        </Link>
+                        <Link to={AppRoutes.LOGIN}>
+                            <LogoutIcon />
+                        </Link>
+                    </IconButton>
+                </span>
+            );
+        }
+    };
+
     return (
-      <Box maxWidth="1200px" margin="1rem auto">
-        <Outlet />
-      </Box>
+        <Box sx={{ flexGrow: 1 }}>
+            <AppBar position="static">
+                <Toolbar>
+                    <IconButton
+                        size="large"
+                        edge="start"
+                        color="inherit"
+                        aria-label="menu"
+                        sx={{ mr: 2 }}
+                    >
+                        <MenuIcon />
+                    </IconButton>
+                    <Typography
+                        variant="h6"
+                        component="div"
+                        sx={{ flexGrow: 1 }}
+                    >
+                        Coffee shop
+                    </Typography>
+                    {renderContent()}
+                </Toolbar>
+            </AppBar>
+            <Box maxWidth="1200px" margin="1rem auto">
+                <Outlet />
+            </Box>
+        </Box>
     );
-  }
-
-  const renderContent = () => {
-    if (role === Role.MANAGER || role === Role.BARISTA) {
-      return (
-        <span>
-          <IconButton
-            size="large"
-            aria-label="account of current user"
-            aria-controls="menu-appbar"
-            aria-haspopup="true"
-            color="inherit"
-            onClick={logout}
-          >
-            <Link to={AppRoutes.LOGIN}>
-              <LogoutIcon />
-            </Link>
-          </IconButton>
-        </span>
-      );
-    }
-    if (role === Role.CUSTOMER) {
-      return (
-        <span>
-          <IconButton
-            size="large"
-            aria-label="account of current user"
-            aria-controls="menu-appbar"
-            aria-haspopup="true"
-            color="inherit"
-            onClick={logout}
-          >
-            <Link to={AppRoutes.CART}>
-              <ShoppingCartIcon />
-            </Link>
-            <Link to={AppRoutes.LOGIN}>
-              <LogoutIcon />
-            </Link>
-          </IconButton>
-        </span>
-      );
-    }
-  };
-
-  return (
-    <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static">
-        <Toolbar>
-          <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            sx={{ mr: 2 }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Coffee shop
-          </Typography>
-          {renderContent()}
-        </Toolbar>
-      </AppBar>
-      <Box maxWidth="1200px" margin="1rem auto">
-        <Outlet />
-      </Box>
-    </Box>
-  );
 }
