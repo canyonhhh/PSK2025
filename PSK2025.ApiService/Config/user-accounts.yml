@@ -4,15 +4,18 @@ users:
     firstName: Manager
     lastName: User
     role: Manager
+    phoneNumber: +1234567890
 
   - email: customer@example.com
     password: UserPassword123!
     firstName: Regular
     lastName: User
     role: Customer
+    phoneNumber: +0987654321
 
   - email: barista@example.com
     password: BaristaPassword123!
     firstName: Barista
     lastName: User
     role: Barista
+    phoneNumber: +1122334455

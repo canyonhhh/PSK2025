@@ -20,7 +20,7 @@ namespace PSK2025.Data.Seed
             {
                 var userSeedData = new UserSeedData
                 {
-                    Users = new List<UserAccount>()
+                    Users = []
                 };
 
                 logger.LogInformation($"configuration: {configuration.GetSection("Users").Value}");
@@ -53,6 +53,7 @@ namespace PSK2025.Data.Seed
                             EmailConfirmed = true,
                             FirstName = userAccount.FirstName,
                             LastName = userAccount.LastName,
+                            PhoneNumber = userAccount.PhoneNumber,
                         };
 
                         var result = await userManager.CreateAsync(user, userAccount.Password);
