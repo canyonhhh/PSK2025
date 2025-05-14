@@ -22,7 +22,6 @@ namespace PSK2025.ApiService.Services
             {
                 var settings = await _repo.GetAsync();
                 var paused = settings?.OrderingPaused ?? false;
-                // if paused, surface Disabled; otherwise None
                 return (paused, paused
                     ? ServiceError.Disabled
                     : ServiceError.None);

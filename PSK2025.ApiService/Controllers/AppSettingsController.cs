@@ -2,12 +2,13 @@
 using Microsoft.AspNetCore.Mvc;
 using PSK2025.ApiService.Services.Interfaces;
 using PSK2025.Models.Enums;
+using PSK2025.Models.Extensions;
 using System.Threading.Tasks;
 
 namespace PSK2025.ApiService.Controllers
 {
     [ApiController]
-    [Route("api/admin/settings")]
+    [Route("[controller]")]
     [Authorize(Roles = "Manager")]
     public class AppSettingsController : ControllerBase
     {
@@ -18,29 +19,46 @@ namespace PSK2025.ApiService.Controllers
             _service = service;
         }
 
-        [HttpGet("ordering-status")]
-        public async Task<IActionResult> GetStatus()
+        [HttpGet("status")]
+        public async Task<IActionResult> GetOrderingStatus()
         {
             var (paused, error) = await _service.GetOrderingStatusAsync();
-            if (error != ServiceError.None)
-                return StatusCode(500, new { message = "Database error" });
-            return Ok(new { orderingPaused = paused });
+
+            if (error == ServiceError.None)
+                return Ok(new { orderingPaused = paused });
+
+            return StatusCode(
+                error.GetStatusCode(),
+                error.GetErrorMessage("ordering")
+            );
         }
 
-        [HttpPost("pause-ordering")]
-        public async Task<IActionResult> Pause()
+        [HttpPost("pause")]
+        public async Task<IActionResult> PauseOrdering()
         {
-            if (await _service.PauseOrderingAsync() != ServiceError.None)
-                return StatusCode(500, new { message = "Could not pause ordering." });
-            return NoContent();
+            var error = await _service.PauseOrderingAsync();
+
+            if (error == ServiceError.None)
+                return NoContent();
+
+            return StatusCode(
+                error.GetStatusCode(),
+                error.GetErrorMessage("ordering")
+            );
         }
 
-        [HttpPost("resume-ordering")]
-        public async Task<IActionResult> Resume()
+        [HttpPost("resume")]
+        public async Task<IActionResult> ResumeOrdering()
         {
-            if (await _service.ResumeOrderingAsync() != ServiceError.None)
-                return StatusCode(500, new { message = "Could not resume ordering." });
-            return NoContent();
+            var error = await _service.ResumeOrderingAsync();
+
+            if (error == ServiceError.None)
+                return NoContent();
+
+            return StatusCode(
+                error.GetStatusCode(),
+                error.GetErrorMessage("ordering")
+            );
         }
     }
 }
