@@ -12,6 +12,7 @@ namespace PSK2025.Data.Contexts
         public DbSet<Cart> Carts { get; set; }
         public DbSet<Order> Orders { get; set; } = null!;
         public DbSet<OrderItem> OrderItems { get; set; } = null!;
+        public DbSet<AppSettings> AppSettings { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
