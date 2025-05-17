@@ -99,5 +99,77 @@ namespace PSK2025.Data.Repositories
             await dbContext.SaveChangesAsync();
             return true;
         }
+
+        public async Task<IList<ItemOrderCountDto>> GetItemOrderCountsAsync() =>
+            await dbContext.Orders
+                .SelectMany(o => o.Items)
+                .GroupBy(i => new { i.ProductId, i.ProductName })
+                .Select(g => new ItemOrderCountDto
+                {
+                    ProductId = g.Key.ProductId,
+                    ProductName = g.Key.ProductName,
+                    TotalQuantity = g.Sum(i => i.Quantity)
+                })
+                .ToListAsync();
+
+        public async Task<IList<TimeSeriesPointDto>> GetOrderCountsOverTimeAsync(
+            DateTime from,
+            DateTime to,
+            TimeGrouping grouping)
+        {
+            var daily = await dbContext.Orders
+                .Where(o => o.CreatedAt >= from && o.CreatedAt <= to)
+                .GroupBy(o => o.CreatedAt.Date)
+                .Select(g => new TimeSeriesPointDto { Period = g.Key, Count = g.Count() })
+                .ToListAsync();
+
+            return grouping switch
+            {
+                TimeGrouping.Weekly => daily
+                    .GroupBy(p => StartOfWeek(p.Period, DayOfWeek.Monday))
+                    .Select(g => new TimeSeriesPointDto { Period = g.Key, Count = g.Sum(x => x.Count) })
+                    .OrderBy(x => x.Period)
+                    .ToList(),
+                TimeGrouping.Monthly => daily
+                    .GroupBy(p => new DateTime(p.Period.Year, p.Period.Month, 1))
+                    .Select(g => new TimeSeriesPointDto { Period = g.Key, Count = g.Sum(x => x.Count) })
+                    .OrderBy(x => x.Period)
+                    .ToList(),
+                _ => daily.OrderBy(x => x.Period).ToList(),
+            };
+        }
+
+        public async Task<IList<TimeSeriesPointDto>> GetItemOrderCountsOverTimeAsync(
+            string productId,
+            DateTime from,
+            DateTime to,
+            TimeGrouping grouping)
+        {
+            var daily = await dbContext.Orders
+                .Where(o => o.CreatedAt >= from && o.CreatedAt <= to)
+                .SelectMany(o => o.Items.Where(i => i.ProductId == productId),
+                    (o, i) => new { Date = o.CreatedAt.Date, Quantity = i.Quantity })
+                .GroupBy(x => x.Date)
+                .Select(g => new TimeSeriesPointDto { Period = g.Key, Count = g.Sum(x => x.Quantity) })
+                .ToListAsync();
+
+            return grouping switch
+            {
+                TimeGrouping.Weekly => daily
+                    .GroupBy(p => StartOfWeek(p.Period, DayOfWeek.Monday))
+                    .Select(g => new TimeSeriesPointDto { Period = g.Key, Count = g.Sum(x => x.Count) })
+                    .OrderBy(x => x.Period)
+                    .ToList(),
+                TimeGrouping.Monthly => daily
+                    .GroupBy(p => new DateTime(p.Period.Year, p.Period.Month, 1))
+                    .Select(g => new TimeSeriesPointDto { Period = g.Key, Count = g.Sum(x => x.Count) })
+                    .OrderBy(x => x.Period)
+                    .ToList(),
+                _ => daily.OrderBy(x => x.Period).ToList(),
+            };
+        }
+
+        private static DateTime StartOfWeek(DateTime dt, DayOfWeek start) =>
+            dt.AddDays(-((int)dt.DayOfWeek - (int)start + 7) % 7).Date;
     }
 }
