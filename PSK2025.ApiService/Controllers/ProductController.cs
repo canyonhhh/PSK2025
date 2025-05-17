@@ -69,6 +69,25 @@ namespace PSK2025.ApiService.Controllers
                 error.GetErrorMessage("Product"));
         }
 
+        [HttpPut("{id}/availability")]
+        [Authorize(Roles = "Barista")]
+        public async Task<IActionResult> UpdateProductAvailability(string id, [FromBody] UpdateProductAvailabilityDto model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var (product, error) = await productService.UpdateProductAvailabilityAsync(id, model);
+
+            if (error == ServiceError.None)
+                return Ok(product);
+
+            return StatusCode(
+                    error.GetStatusCode(),
+                    error.GetErrorMessage("Product"));
+        }
+
         [HttpDelete("{id}")]
         [Authorize(Roles = "Manager")]
         public async Task<IActionResult> DeleteProduct(string id)
@@ -79,8 +98,8 @@ namespace PSK2025.ApiService.Controllers
                 return NoContent();
 
             return StatusCode(
-                error.GetStatusCode(),
-                error.GetErrorMessage("Product"));
+                    error.GetStatusCode(),
+                    error.GetErrorMessage("Product"));
         }
     }
 }

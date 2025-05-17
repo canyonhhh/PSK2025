@@ -18,10 +18,8 @@ namespace PSK2025.ApiService.Mappings
                 .ForMember(dest => dest.RememberMe, opt => opt.MapFrom(src => false));
 
             // Product mappings
-            CreateMap<Product, ProductDto>();
-
             CreateMap<CreateProductDto, Product>();
-
+            CreateMap<ProductDto, UpdateProductDto>();
             CreateMap<UpdateProductDto, Product>();
 
             CreateMap<Cart, CartDto>();
@@ -32,6 +30,7 @@ namespace PSK2025.ApiService.Mappings
                     opt.MapFrom(src => src.Product != null ? src.Product.Price : 0))
                 .ForMember(dest => dest.ProductPhotoUrl, opt =>
                     opt.MapFrom(src => src.Product != null ? src.Product.PhotoUrl : null));
+
 
             // Order mappings
             CreateMap<Order, OrderDto>();
