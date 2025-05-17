@@ -46,15 +46,10 @@ namespace PSK2025.Data.Repositories
                 return null;
             }
 
-            existingProduct.Title = item.Title;
-            existingProduct.Price = item.Price;
-            existingProduct.PhotoUrl = item.PhotoUrl;
-            existingProduct.Description = item.Description;
-            existingProduct.IsAvailable = item.IsAvailable;
-            existingProduct.UpdatedAt = DateTime.UtcNow;
+            existingProduct.UpdatedAt = DateTime.Now;
 
+            dbContext.Entry(existingProduct).CurrentValues.SetValues(item);
             await dbContext.SaveChangesAsync();
-
             return existingProduct;
         }
 

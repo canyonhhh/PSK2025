@@ -10,5 +10,6 @@ namespace PSK2025.ApiService.Services.Interfaces
         Task<(ProductDto? Product, ServiceError Error)> CreateProductAsync(CreateProductDto model);
         Task<(ProductDto? Product, ServiceError Error)> UpdateProductAsync(string id, UpdateProductDto model);
         Task<ServiceError> DeleteProductAsync(string id);
+        Task<(ProductDto? Product, ServiceError Error)> UpdateProductAvailabilityAsync(string id, UpdateProductAvailabilityDto model);
     }
 }
