@@ -20,19 +20,17 @@ namespace PSK2025.ApiService.Controllers
             _stats = stats;
         }
 
-        [HttpGet("general/top-items")]
-        public async Task<IActionResult> GetTopItems([FromQuery] int count = 5)
+        [HttpGet("ordered-items")]
+        public async Task<IActionResult> GetItems(
+            [FromQuery] int count = 5,
+            [FromQuery] string direction = "descending")
         {
-            return Ok(await _stats.GetTopOrderedItemsAsync(count));
+            bool ascending = direction.Equals("ascending", StringComparison.OrdinalIgnoreCase);
+            var result = await _stats.GetOrderedItemsAsync(count, ascending);
+            return Ok(result);
         }
 
-        [HttpGet("general/least-items")]
-        public async Task<IActionResult> GetLeastItems([FromQuery] int count = 5)
-        {
-            return Ok(await _stats.GetLeastOrderedItemsAsync(count));
-        }
-
-        [HttpGet("general/orders-over-time")]
+        [HttpGet("orders-over-time")]
         public async Task<IActionResult> GetOrdersOverTime(
             [FromQuery] DateTime? from = null,
             [FromQuery] DateTime? to = null,

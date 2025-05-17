@@ -8,8 +8,7 @@ namespace PSK2025.ApiService.Services.Interfaces
 {
     public interface IStatisticsService
     {
-        Task<IList<ItemOrderCountDto>> GetTopOrderedItemsAsync(int topN);
-        Task<IList<ItemOrderCountDto>> GetLeastOrderedItemsAsync(int bottomN);
+        Task<IList<ItemOrderCountDto>> GetOrderedItemsAsync(int count, bool ascending);
         Task<IList<TimeSeriesPointDto>> GetTotalOrdersOverTimeAsync(DateTime from, DateTime to, TimeGrouping grouping);
         Task<IList<TimeSeriesPointDto>> GetItemOrdersOverTimeAsync(string productId, DateTime from, DateTime to, TimeGrouping grouping);
     }

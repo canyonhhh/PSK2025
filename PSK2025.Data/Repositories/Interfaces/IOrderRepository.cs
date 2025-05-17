@@ -19,14 +19,7 @@ namespace PSK2025.Data.Repositories.Interfaces
         Task<bool> DeleteAsync(string id);
 
         Task<IList<ItemOrderCountDto>> GetItemOrderCountsAsync();
-        Task<IList<TimeSeriesPointDto>> GetOrderCountsOverTimeAsync(
-            DateTime from,
-            DateTime to,
-            TimeGrouping grouping);
-        Task<IList<TimeSeriesPointDto>> GetItemOrderCountsOverTimeAsync(
-            string productId,
-            DateTime from,
-            DateTime to,
-            TimeGrouping grouping);
+        Task<IList<TimeSeriesPointDto>> GetOrderCountsOverTimeAsync(DateTime from, DateTime to, TimeGrouping grouping);
+        Task<IList<TimeSeriesPointDto>> GetItemOrderCountsOverTimeAsync(string productId, DateTime from, DateTime to, TimeGrouping grouping);
     }
 }
