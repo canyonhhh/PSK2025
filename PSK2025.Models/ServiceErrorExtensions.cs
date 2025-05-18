@@ -11,6 +11,7 @@ namespace PSK2025.Models.Extensions
             return error switch
             {
                 ServiceError.NotFound => $"The requested {entity} was not found.",
+                ServiceError.Disabled => $"The {entity} functionality is temporarily disabled. Please try again later.",
                 ServiceError.AlreadyExists => $"A {entity} with the same identifier already exists.",
                 ServiceError.InvalidData => $"The provided {entity} data is invalid.",
                 ServiceError.Unauthorized => "You are not authenticated to perform this operation.",
@@ -25,6 +26,7 @@ namespace PSK2025.Models.Extensions
             return error switch
             {
                 ServiceError.None => 200,
+                ServiceError.Disabled => 503,
                 ServiceError.NotFound => 404,
                 ServiceError.AlreadyExists => 409,
                 ServiceError.InvalidData => 400,
