@@ -10,6 +10,7 @@ namespace PSK2025.Models.Enums
         Unauthorized,
         Forbidden,
         DatabaseError,
+        ConcurrencyError,
         Unknown
     }
 }

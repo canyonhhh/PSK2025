@@ -17,6 +17,7 @@ namespace PSK2025.Models.Extensions
                 ServiceError.Unauthorized => "You are not authenticated to perform this operation.",
                 ServiceError.Forbidden => "You do not have permission to perform this operation.",
                 ServiceError.DatabaseError => $"A database error occurred while processing the {entity}.",
+                ServiceError.ConcurrencyError => $"The {entity} has been modified by another user. Please refresh and try again.",
                 ServiceError.Unknown or _ => "An unexpected error occurred."
             };
         }
@@ -33,6 +34,7 @@ namespace PSK2025.Models.Extensions
                 ServiceError.Unauthorized => 401,
                 ServiceError.Forbidden => 403,
                 ServiceError.DatabaseError => 500,
+                ServiceError.ConcurrencyError => 409,
                 ServiceError.Unknown or _ => 500
             };
         }
