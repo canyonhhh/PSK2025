@@ -54,14 +54,14 @@ namespace PSK2025.ApiService.Services
             }
         }
 
-        private async Task<(ProductDto? Product, ServiceError Error)> UpdateProductPropertyAsync(
-                string id,
-                Action<Product> updateAction)
+        private async Task<(ProductDto? Product, ServiceError Error, ProductDto? ConflictingEntity)> UpdateProductPropertyAsync(
+            string id,
+            Action<Product> updateAction)
         {
             var existingProduct = await productRepository.GetByIdAsync(id);
             if (existingProduct == null)
             {
-                return (null, ServiceError.NotFound);
+                return (null, ServiceError.NotFound, null);
             }
 
             try
@@ -70,31 +70,34 @@ namespace PSK2025.ApiService.Services
 
                 existingProduct.UpdatedAt = DateTime.UtcNow;
 
-                var updatedProduct = await productRepository.UpdateAsync(existingProduct);
+                var (updatedProduct, concurrencyConflict, conflictingEntity) = await productRepository.UpdateAsync(existingProduct);
+
+                if (concurrencyConflict)
+                {
+                    return (null, ServiceError.ConcurrencyError,
+                           conflictingEntity != null ? mapper.Map<ProductDto>(conflictingEntity) : null);
+                }
+
                 if (updatedProduct == null)
                 {
-                    return (null, ServiceError.DatabaseError);
+                    return (null, ServiceError.DatabaseError, null);
                 }
-                return (mapper.Map<ProductDto>(updatedProduct), ServiceError.None);
-            }
-            catch (DbUpdateConcurrencyException ex)
-            {
-                logger.LogError($"Concurrency conflict when updating product with ID {id}: {ex.Message}");
-                return (null, ServiceError.ConcurrencyError);
+
+                return (mapper.Map<ProductDto>(updatedProduct), ServiceError.None, null);
             }
             catch (Exception ex)
             {
                 logger.LogError($"Error updating product with ID {id}: {ex.Message}");
-                return (null, ServiceError.DatabaseError);
+                return (null, ServiceError.DatabaseError, null);
             }
         }
 
-        public async Task<(ProductDto? Product, ServiceError Error)> UpdateProductAsync(string id, UpdateProductDto model)
+        public async Task<(ProductDto? Product, ServiceError Error, ProductDto? ConflictingEntity)> UpdateProductAsync(string id, UpdateProductDto model)
         {
             return await UpdateProductPropertyAsync(id, product => mapper.Map(model, product));
         }
 
-        public async Task<(ProductDto? Product, ServiceError Error)> UpdateProductAvailabilityAsync(string id, UpdateProductAvailabilityDto model)
+        public async Task<(ProductDto? Product, ServiceError Error, ProductDto? ConflictingEntity)> UpdateProductAvailabilityAsync(string id, UpdateProductAvailabilityDto model)
         {
             return await UpdateProductPropertyAsync(id, product => product.IsAvailable = model.IsAvailable);
         }

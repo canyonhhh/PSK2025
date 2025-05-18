@@ -59,10 +59,19 @@ namespace PSK2025.ApiService.Controllers
                 return BadRequest(ModelState);
             }
 
-            var (product, error) = await productService.UpdateProductAsync(id, model);
+            var (product, error, conflictingEntity) = await productService.UpdateProductAsync(id, model);
 
             if (error == ServiceError.None)
                 return Ok(product);
+
+            if (error == ServiceError.ConcurrencyError)
+            {
+                return Conflict(new
+                {
+                    message = error.GetErrorMessage(),
+                    currentState = conflictingEntity
+                });
+            }
 
             return StatusCode(
                 error.GetStatusCode(),
@@ -70,7 +79,7 @@ namespace PSK2025.ApiService.Controllers
         }
 
         [HttpPut("{id}/availability")]
-        [Authorize(Roles = "Barista")]
+        [Authorize(Roles = "Manager,Barista")]
         public async Task<IActionResult> UpdateProductAvailability(string id, [FromBody] UpdateProductAvailabilityDto model)
         {
             if (!ModelState.IsValid)
@@ -78,14 +87,23 @@ namespace PSK2025.ApiService.Controllers
                 return BadRequest(ModelState);
             }
 
-            var (product, error) = await productService.UpdateProductAvailabilityAsync(id, model);
+            var (product, error, conflictingEntity) = await productService.UpdateProductAvailabilityAsync(id, model);
 
             if (error == ServiceError.None)
                 return Ok(product);
 
+            if (error == ServiceError.ConcurrencyError)
+            {
+                return Conflict(new
+                {
+                    message = error.GetErrorMessage(),
+                    currentState = conflictingEntity
+                });
+            }
+
             return StatusCode(
-                    error.GetStatusCode(),
-                    error.GetErrorMessage("Product"));
+                error.GetStatusCode(),
+                error.GetErrorMessage("Product"));
         }
 
         [HttpDelete("{id}")]
@@ -98,8 +116,8 @@ namespace PSK2025.ApiService.Controllers
                 return NoContent();
 
             return StatusCode(
-                    error.GetStatusCode(),
-                    error.GetErrorMessage("Product"));
+                error.GetStatusCode(),
+                error.GetErrorMessage("Product"));
         }
     }
 }

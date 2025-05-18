@@ -18,6 +18,7 @@ namespace PSK2025.ApiService.Mappings
                 .ForMember(dest => dest.RememberMe, opt => opt.MapFrom(src => false));
 
             // Product mappings
+            CreateMap<Product, ProductDto>();
             CreateMap<CreateProductDto, Product>();
             CreateMap<ProductDto, UpdateProductDto>();
             CreateMap<UpdateProductDto, Product>();

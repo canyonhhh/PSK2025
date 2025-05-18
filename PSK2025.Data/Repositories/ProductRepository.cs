@@ -37,20 +37,37 @@ namespace PSK2025.Data.Repositories
             return item;
         }
 
-        public async Task<Product?> UpdateAsync(Product item)
+        public async Task<(Product? Product, bool ConcurrencyConflict, Product? ConflictingEntity)> UpdateAsync(Product item)
         {
-            Product? existingProduct = await dbContext.Products.FindAsync(item.Id);
-
-            if (existingProduct == null)
+            try
             {
-                return null;
+                var existingProduct = await dbContext.Products.FindAsync(item.Id);
+                if (existingProduct == null)
+                {
+                    return (null, false, null);
+                }
+
+                dbContext.Entry(existingProduct).CurrentValues.SetValues(item);
+                await dbContext.SaveChangesAsync();
+                return (existingProduct, false, null);
             }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                var entry = ex.Entries.Single();
+                var databaseValues = await entry.GetDatabaseValuesAsync();
 
-            existingProduct.UpdatedAt = DateTime.Now;
+                if (databaseValues == null)
+                {
+                    return (null, true, null);
+                }
 
-            dbContext.Entry(existingProduct).CurrentValues.SetValues(item);
-            await dbContext.SaveChangesAsync();
-            return existingProduct;
+                var databaseEntity = (Product)databaseValues.ToObject();
+                return (null, true, databaseEntity);
+            }
+            catch (Exception)
+            {
+                return (null, false, null);
+            }
         }
 
         public async Task<bool> DeleteAsync(string id)
