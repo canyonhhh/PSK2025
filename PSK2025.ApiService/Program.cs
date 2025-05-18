@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PSK2025.ApiService.Mappings;
 using PSK2025.ApiService.Services;
+using PSK2025.ApiService.Services.Decorators;
 using PSK2025.ApiService.Services.Interfaces;
 using PSK2025.Data.Contexts;
 using PSK2025.Data.Repositories;
@@ -106,6 +107,8 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<ISmsService, TwilioSmsService>();
+builder.Services.Decorate<IOrderService, OrderServiceSmsNotificationDecorator>();
 builder.Services.AddScoped<IAppSettingsService, AppSettingsService>();
 
 builder.Services.AddScoped<IGetUserIdService, GetUserIdService>();
