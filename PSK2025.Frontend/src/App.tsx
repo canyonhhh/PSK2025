@@ -11,6 +11,8 @@ import RequireRole from "./routing/RequireRole";
 import { NavigationLayout } from "./components/NavigationLayout";
 import { ProductMenu } from "./components/productMenu/ProductMenu";
 import CartPage from "./pages/cartPage/CartPage";
+import ManagerOrdersPage from "./pages/ordersPage/ManagerOrdersPage";
+import CustomerOrdersPage from "./pages/customerOrders/CustomerOrdersPage";
 
 const queryClient = new QueryClient();
 
@@ -19,10 +21,8 @@ function App() {
         <AuthContextProvider>
             <QueryClientProvider client={queryClient}>
                 <BrowserRouter>
-                    <Route path={"/carts"} element={<CartPage />} />
                     <Routes>
                         <Route element={<NavigationLayout />}>
-                            <Route path={"/cart"} element={<CartPage />} />
                             <Route
                                 path={AppRoutes.LOGIN}
                                 element={<LoginPage />}
@@ -38,7 +38,12 @@ function App() {
                                             authorizeFor={Role.MANAGER}
                                         />
                                     }
-                                ></Route>
+                                >
+                                    <Route
+                                        path={AppRoutes.ALL_ORDERS}
+                                        element={<ManagerOrdersPage />}
+                                    />
+                                </Route>
                                 <Route
                                     element={
                                         <RequireRole
@@ -52,10 +57,19 @@ function App() {
                                             authorizeFor={Role.CUSTOMER}
                                         />
                                     }
-                                ></Route>
+                                >
+                                    <Route
+                                        path={AppRoutes.CART}
+                                        element={<CartPage />}
+                                    />
+                                    <Route
+                                        path={AppRoutes.CUSTOMER_ORDERS}
+                                        element={<CustomerOrdersPage />}
+                                    />
+                                </Route>
                                 <Route
                                     path={AppRoutes.MENU}
-                                    element={<ProductMenu columnCount={1} />}
+                                    element={<ProductMenu />}
                                     index
                                 />
                                 <Route

@@ -8,16 +8,26 @@ const CONTROLLER = "/Order";
 
 // TODO: Add error handling
 export const fetchOrders = async (
-    userId: string,
-    status: number,
-    sortBy: number,
-    ascending: boolean,
     page: number,
     pageSize: number,
+    userId?: string,
+    status?: number,
+    sortBy?: number,
+    ascending?: boolean,
 ): Promise<PaginatedResponse<OrderDto>> => {
+    const params = new URLSearchParams();
+
+    if (userId !== undefined) params.append("userId", userId);
+    if (status !== undefined) params.append("status", String(status));
+    if (sortBy !== undefined) params.append("sortBy", String(sortBy));
+    if (ascending !== undefined) params.append("ascending", String(ascending));
+    if (page !== undefined) params.append("page", String(page));
+    if (pageSize !== undefined) params.append("pageSize", String(pageSize));
+
     const response = await api.get<PaginatedResponse<OrderDto>>(
-        `${CONTROLLER}/?userId=${userId}&status=${status}&sortBy=${sortBy}&ascending=${ascending}&page=${page}&pageSize=${pageSize}`,
+        `${CONTROLLER}/?${params.toString()}`,
     );
+
     return response.data;
 };
 

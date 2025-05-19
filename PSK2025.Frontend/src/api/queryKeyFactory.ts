@@ -1,5 +1,22 @@
 export const keys = {
     randomNumber: ["randomNumber"],
-    allProducts: ["allProducts"],
+    allProducts: (pageCount: number) => [
+        "allproducts",
+        `allProducts_${pageCount}`,
+    ],
+    allProductsAll: ["allproducts"],
+    orders: {
+        all: ["all_orders"],
+        page: (page: number) => ["all_orders", `all_orders_${page}`],
+        my: ["my_orders"],
+        barista: {
+            all: ["all_orders_barista"],
+            page: (page: number) => [
+                "all_orders_barista",
+                `all_orders_barista_${page}`,
+            ],
+        },
+    },
     activeCart: ["activeCart"],
+    ordersByUser: (userId: string) => [`orders_${userId}`],
 };

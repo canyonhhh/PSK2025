@@ -1,39 +1,24 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-    Alert,
-    Box,
-    Button,
-    CircularProgress,
-    Grid,
-    IconButton,
-    InputBase,
-    Paper,
-} from "@mui/material";
-import { ProductDto } from "../../api/types/Product";
+import { Alert, Box, Button, CircularProgress } from "@mui/material";
 import { keys } from "../../api/queryKeyFactory";
 import { fetchAllProducts } from "../../api/requests/product/ProductRequests";
 import ProductMenuItem from "./productMenuItem/ProductMenuItem";
 import { useState } from "react";
-import SearchIcon from "@mui/icons-material/Search";
 import { useAuthContext } from "../../context/AuthContext";
 import { Role } from "../../routing/roles";
 import CreateProductModal from "./CreateProductModal";
+import { PaginatedItems } from "../paginatedItemBox/PaginatedItemBox";
 
-const SIZE_PER_PAGE = 16;
+const SIZE_PER_PAGE = 12;
 
-interface ManagerMenuProps {
-    columnCount: number;
-}
-
-export function ProductMenu({ columnCount }: ManagerMenuProps) {
+export function ProductMenu() {
     const { role } = useAuthContext();
-    const [pageCount, _setPageCount] = useState(1);
+    const [pageCount, setPageCount] = useState(1);
     let { data: paginatedRows, isFetching } = useQuery({
-        queryKey: keys.allProducts,
+        queryKey: keys.allProducts(pageCount),
         queryFn: () => fetchAllProducts(pageCount, SIZE_PER_PAGE),
     });
 
-    const [filterString, setFilterString] = useState<string>("");
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
     if (!isFetching && !paginatedRows) {
@@ -42,20 +27,6 @@ export function ProductMenu({ columnCount }: ManagerMenuProps) {
 
     if (isFetching || !paginatedRows) {
         return <CircularProgress />;
-    }
-
-    const rows = paginatedRows?.items;
-    let filteredProducts: ProductDto[];
-    if (!filterString) {
-        filteredProducts = rows;
-    } else {
-        filteredProducts = rows.filter(
-            (row) =>
-                row.title.toLowerCase().includes(filterString.toLowerCase()) ||
-                row.description
-                    ?.toLowerCase()
-                    .includes(filterString.toLowerCase()),
-        );
     }
 
     return (
@@ -67,30 +38,6 @@ export function ProductMenu({ columnCount }: ManagerMenuProps) {
                 alignItems="start"
                 pb={2}
             >
-                <Paper
-                    sx={{
-                        p: "2px 4px",
-                        mb: "1rem",
-                        display: "flex",
-                        alignItems: "center",
-                        maxWidth: "500px",
-                    }}
-                >
-                    <InputBase
-                        sx={{ ml: 1, flex: 1 }}
-                        placeholder="Search in products"
-                        value={filterString}
-                        onChange={(e) => setFilterString(e.target.value)}
-                        inputProps={{ "aria-label": "search in products" }}
-                    />
-                    <IconButton
-                        type="button"
-                        sx={{ p: "10px" }}
-                        aria-label="search"
-                    >
-                        <SearchIcon />
-                    </IconButton>
-                </Paper>
                 {role == Role.MANAGER && (
                     <Button
                         variant="outlined"
@@ -102,11 +49,13 @@ export function ProductMenu({ columnCount }: ManagerMenuProps) {
                     </Button>
                 )}
             </Box>
-            <Grid container spacing={4} columns={columnCount}>
-                {filteredProducts.map((row) => (
-                    <ProductMenuItem key={row.id} product={row} />
-                ))}
-            </Grid>
+            <PaginatedItems
+                content={paginatedRows}
+                itemRenderer={(item) => (
+                    <ProductMenuItem key={item.id} product={item} />
+                )}
+                onPageChange={setPageCount}
+            />
             <CreateProductModal
                 open={isCreateModalOpen}
                 handleCloseCreateModal={() => setIsCreateModalOpen(false)}

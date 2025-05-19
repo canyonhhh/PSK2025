@@ -44,7 +44,7 @@ const ItemEditModal = ({ open, handleCloseEditModal, product }: Props) => {
     const [toastMessage, setToastMessage] = useState<string | null>();
     const { mutate } = useMutation({
         onSuccess: () =>
-            queryClient.invalidateQueries({ queryKey: keys.allProducts }),
+            queryClient.invalidateQueries({ queryKey: keys.allProductsAll }),
         onError: () => {
             setToastMessage("Failed to update product");
         },

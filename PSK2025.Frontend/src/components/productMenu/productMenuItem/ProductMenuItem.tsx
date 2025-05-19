@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Snackbar, Typography } from "@mui/material";
+import { Box, Button, Snackbar, Typography } from "@mui/material";
 import noProductImage from "../../../no-photos.png";
 import { useState } from "react";
 import ItemEditModal from "./ItemEditModal";
@@ -9,6 +9,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { keys } from "../../../api/queryKeyFactory";
 import { useAuthContext } from "../../../context/AuthContext";
 import { Role } from "../../../routing/roles";
+import { createCartItem } from "../../../api/requests/cart/cartRequests";
 
 interface ShopMenuItemProps {
     product: ProductDto;
@@ -26,7 +27,20 @@ const ProductMenuItem = ({ product }: ShopMenuItemProps) => {
         mutationFn: (id: string) => deleteProduct(id),
         onError: () => setToastMessage("Failed to delete product"),
         onSuccess: () =>
-            queryClient.invalidateQueries({ queryKey: keys.allProducts }),
+            queryClient.invalidateQueries({ queryKey: keys.allProductsAll }),
+    });
+
+    const { mutate: addToCartMutation } = useMutation({
+        mutationFn: () =>
+            createCartItem({
+                productId: product.id,
+                quantity: 1,
+            }),
+        onError: () => setToastMessage("Failed to add item to cart"),
+        onSuccess: () => {
+            setToastMessage(`${product.title} added to cart`);
+            queryClient.invalidateQueries({ queryKey: keys.activeCart });
+        },
     });
 
     const handleConfirmDelete = () => {
@@ -41,7 +55,12 @@ const ProductMenuItem = ({ product }: ShopMenuItemProps) => {
     const renderActionButtons = () => {
         if (role === Role.CUSTOMER) {
             return (
-                <Button variant="outlined" onClick={() => {}}>
+                <Button
+                    variant="outlined"
+                    onClick={() => {
+                        addToCartMutation();
+                    }}
+                >
                     Add to cart
                 </Button>
             );
@@ -66,14 +85,16 @@ const ProductMenuItem = ({ product }: ShopMenuItemProps) => {
     };
 
     return (
-        <Grid
-            size={1}
-            marginBottom="2rem"
-            boxShadow="9"
-            padding="1rem 2rem"
-            borderRadius="0.5rem"
+        <Box
+            sx={{
+                borderRadius: 4,
+                boxShadow: 3,
+                p: 3,
+                backgroundColor: "background.paper",
+                margin: "auto",
+            }}
         >
-            <Box display="flex" alignItems="center">
+            <Box display="flex" flexDirection="column" alignItems="start">
                 <Box maxWidth="300px" marginRight="2rem" flexShrink={0}>
                     <Box>
                         <Box
@@ -128,7 +149,7 @@ const ProductMenuItem = ({ product }: ShopMenuItemProps) => {
                 onClose={() => setToastMessage(null)}
                 message={toastMessage}
             />
-        </Grid>
+        </Box>
     );
 };
 

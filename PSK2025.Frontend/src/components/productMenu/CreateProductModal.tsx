@@ -42,7 +42,7 @@ const CreateProductModal = ({ open, handleCloseCreateModal }: Props) => {
     const [toastMessage, setToastMessage] = useState<string | null>();
     const { mutate } = useMutation({
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: keys.allProducts });
+            queryClient.invalidateQueries({ queryKey: keys.allProductsAll });
             handleCloseCreateModal();
         },
         onError: () => {

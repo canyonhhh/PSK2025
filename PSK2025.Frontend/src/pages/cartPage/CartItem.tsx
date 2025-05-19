@@ -1,54 +1,100 @@
+import React from "react";
 import {
+    Box,
+    Typography,
+    IconButton,
     Button,
     Card,
-    CardActions,
-    CardContent,
     CardMedia,
-    IconButton,
-    InputLabel,
-    OutlinedInput,
-    Typography,
 } from "@mui/material";
+import RemoveIcon from "@mui/icons-material/Remove";
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { CartItemDto } from "../../api/requests/cart/types/CartItemDto";
-import { AddCircle, RemoveCircle } from "@mui/icons-material";
 
-interface CartItemProps {
-    cartItem: CartItemDto;
+interface CartItemCardProps {
+    item: CartItemDto;
+    onIncrease: (id: string) => void;
+    onDecrease: (id: string) => void;
+    onRemove: (id: string) => void;
 }
 
-const CartItem = ({
-    cartItem: { quantity, price, productName, imageUrl, description },
-}: CartItemProps) => {
+const CartItem: React.FC<CartItemCardProps> = ({
+    item,
+    onIncrease,
+    onDecrease,
+    onRemove,
+}) => {
     return (
-        <Card sx={{ maxWidth: 345 }}>
+        <Card
+            sx={{
+                display: "flex",
+                alignItems: "center",
+                p: 2,
+                borderRadius: 2,
+                boxShadow: 1,
+                mb: 2,
+            }}
+        >
             <CardMedia
-                sx={{ height: 140 }}
-                image={imageUrl}
-                title="green iguana"
+                component="img"
+                image={item.imageUrl || "https://via.placeholder.com/80"}
+                alt={item.productName || "Product"}
+                sx={{
+                    width: 80,
+                    height: 80,
+                    borderRadius: 1,
+                    objectFit: "cover",
+                    mr: 2,
+                }}
             />
-            <CardContent>
-                <Typography gutterBottom variant="h5" component="div">
-                    {productName} - <strong>{price}</strong>
+
+            <Box flexGrow={1}>
+                <Typography fontWeight="bold">
+                    {item.productName || "Name"}
                 </Typography>
-                <Typography gutterBottom variant="h5" component="div">
-                    {productName}
+                <Typography color="text.secondary">
+                    {item.productPrice.toFixed(2)} €
                 </Typography>
-                <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                    {description}
-                </Typography>
-            </CardContent>
-            <CardActions>
-                <IconButton>
-                    <AddCircle />
-                </IconButton>
-                <InputLabel htmlFor="amount">Amount</InputLabel>
-                <OutlinedInput id="amount" value={quantity} type="number" />
-                <IconButton>
-                    <RemoveCircle />
-                </IconButton>
-                <Button size="small"></Button>
-                <Button size="small">Share</Button>
-            </CardActions>
+
+                <Box mt={1} display="flex" alignItems="center" gap={1}>
+                    <IconButton
+                        size="small"
+                        onClick={() => onDecrease(item.productId)}
+                        disabled={item.quantity <= 1}
+                        sx={{ border: "1px solid #ccc" }}
+                    >
+                        <RemoveIcon fontSize="small" />
+                    </IconButton>
+                    <Typography>{item.quantity}</Typography>
+                    <IconButton
+                        size="small"
+                        onClick={() => onIncrease(item.productId)}
+                        sx={{ border: "1px solid #ccc" }}
+                    >
+                        <AddIcon fontSize="small" />
+                    </IconButton>
+                    <Button
+                        variant="contained"
+                        color="inherit"
+                        size="small"
+                        onClick={() => onRemove(item.productId)}
+                        startIcon={<DeleteIcon />}
+                        sx={{
+                            backgroundColor: "#212121",
+                            color: "#fff",
+                            textTransform: "none",
+                            borderRadius: 2,
+                            ml: 1,
+                            "&:hover": {
+                                backgroundColor: "#000",
+                            },
+                        }}
+                    >
+                        Remove
+                    </Button>
+                </Box>
+            </Box>
         </Card>
     );
 };

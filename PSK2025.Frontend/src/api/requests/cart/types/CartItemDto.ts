@@ -1,8 +1,9 @@
 export interface CartItemDto {
-    itemId: string;
+    id: string;
+    productId: string;
     quantity: number;
     productName: string | undefined;
-    ProductPrice: number;
+    productPrice: number;
     description?: string;
     imageUrl?: string;
 }

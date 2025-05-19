@@ -1,18 +1,29 @@
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
-import IconButton from "@mui/material/IconButton";
+import { useState } from "react";
+import {
+    AppBar,
+    Box,
+    Toolbar,
+    Typography,
+    IconButton,
+    Drawer,
+    List,
+    ListItemText,
+    ListItemButton,
+} from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { Link, Outlet } from "react-router-dom";
 import { useAuthContext } from "../context/AuthContext";
-import { Role } from "../routing/roles";
 import { AppRoutes } from "../routing/appRoutes";
+import { Role } from "../routing/roles";
 
 export function NavigationLayout() {
     const { role, logout } = useAuthContext();
+    const [drawerOpen, setDrawerOpen] = useState(false);
+
+    const toggleDrawer = (open: boolean) => () => {
+        setDrawerOpen(open);
+    };
 
     if (!role) {
         return (
@@ -22,47 +33,63 @@ export function NavigationLayout() {
         );
     }
 
-    const renderContent = () => {
-        if (role === Role.MANAGER || role === Role.BARISTA) {
-            return (
-                <span>
-                    <IconButton
-                        size="large"
-                        aria-label="account of current user"
-                        aria-controls="menu-appbar"
-                        aria-haspopup="true"
-                        color="inherit"
-                        onClick={logout}
-                    >
-                        <Link to={AppRoutes.LOGIN}>
-                            <LogoutIcon />
-                        </Link>
-                    </IconButton>
-                </span>
-            );
-        }
+    const getRoleSpecificDrawerItems = () => {
         if (role === Role.CUSTOMER) {
             return (
-                <span>
-                    <IconButton
-                        size="large"
-                        aria-label="account of current user"
-                        aria-controls="menu-appbar"
-                        aria-haspopup="true"
-                        color="inherit"
-                        onClick={logout}
+                <List>
+                    <ListItemButton component={Link} to={AppRoutes.CART}>
+                        <ListItemText primary="Cart" />
+                    </ListItemButton>
+                    <ListItemButton component={Link} to={AppRoutes.MENU}>
+                        <ListItemText primary="Menu" />
+                    </ListItemButton>
+                    <ListItemButton
+                        component={Link}
+                        to={AppRoutes.CUSTOMER_ORDERS}
                     >
-                        <Link to={AppRoutes.CART}>
-                            <ShoppingCartIcon />
-                        </Link>
-                        <Link to={AppRoutes.LOGIN}>
-                            <LogoutIcon />
-                        </Link>
-                    </IconButton>
-                </span>
+                        <ListItemText primary="My Orders" />
+                    </ListItemButton>
+                </List>
+            );
+        }
+        if (role === Role.BARISTA) {
+            return (
+                <List>
+                    <ListItemButton component={Link} to={AppRoutes.MENU}>
+                        <ListItemText primary="Menu" />
+                    </ListItemButton>
+                    <ListItemButton
+                        component={Link}
+                        to={AppRoutes.BARISTA_ORDERS}
+                    >
+                        <ListItemText primary="Orders" />
+                    </ListItemButton>
+                </List>
+            );
+        }
+        if (role === Role.MANAGER) {
+            return (
+                <List>
+                    <ListItemButton component={Link} to={AppRoutes.MENU}>
+                        <ListItemText primary="Menu" />
+                    </ListItemButton>
+                    <ListItemButton component={Link} to={AppRoutes.ALL_ORDERS}>
+                        <ListItemText primary="Orders" />
+                    </ListItemButton>
+                </List>
             );
         }
     };
+
+    const drawerItems = (
+        <Box
+            sx={{ width: 250 }}
+            role="presentation"
+            onClick={toggleDrawer(false)}
+        >
+            {getRoleSpecificDrawerItems()}
+        </Box>
+    );
 
     return (
         <Box sx={{ flexGrow: 1 }}>
@@ -74,6 +101,7 @@ export function NavigationLayout() {
                         color="inherit"
                         aria-label="menu"
                         sx={{ mr: 2 }}
+                        onClick={toggleDrawer(true)}
                     >
                         <MenuIcon />
                     </IconButton>
@@ -84,10 +112,30 @@ export function NavigationLayout() {
                     >
                         Coffee shop
                     </Typography>
-                    {renderContent()}
+                    <span>
+                        <IconButton
+                            size="large"
+                            aria-label="account of current user"
+                            aria-controls="menu-appbar"
+                            aria-haspopup="true"
+                            color="inherit"
+                            onClick={logout}
+                        >
+                            <Link to={AppRoutes.LOGIN}>
+                                <LogoutIcon />
+                            </Link>
+                        </IconButton>
+                    </span>
                 </Toolbar>
             </AppBar>
-            <Box maxWidth="1200px" margin="1rem auto">
+            <Drawer
+                anchor="left"
+                open={drawerOpen}
+                onClose={toggleDrawer(false)}
+            >
+                {drawerItems}
+            </Drawer>
+            <Box maxWidth="1200px" margin="1rem auto" paddingX="1rem">
                 <Outlet />
             </Box>
         </Box>
