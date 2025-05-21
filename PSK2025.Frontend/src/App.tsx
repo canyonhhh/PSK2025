@@ -50,7 +50,12 @@ function App() {
                                             authorizeFor={Role.BARISTA}
                                         />
                                     }
-                                ></Route>
+                                >
+                                    <Route
+                                        path={AppRoutes.BARISTA_ORDERS}
+                                        element={<></>}
+                                    />
+                                </Route>
                                 <Route
                                     element={
                                         <RequireRole

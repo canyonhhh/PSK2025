@@ -1,11 +1,11 @@
+import { Alert, Box, CircularProgress, Typography } from "@mui/material";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { fetchOrders } from "../../api/requests/order/orderRequests";
 import { keys } from "../../api/queryKeyFactory";
-import { Alert, Box, CircularProgress, Typography } from "@mui/material";
+import { fetchOrders } from "../../api/requests/order/orderRequests";
 import OrdersTable from "../../components/ordersTable/OrdersTable";
 
-const CustomerOrdersPage = () => {
+const BaristaOrdersPage = () => {
     const queryClient = useQueryClient();
     const [currentPage, setCurrentPage] = useState(1);
     // TODO: use these fields for sorting
@@ -48,7 +48,7 @@ const CustomerOrdersPage = () => {
     return (
         <Box>
             <Typography variant="h4" gutterBottom>
-                Your order history
+                Current Active Orders
             </Typography>
             <OrdersTable
                 paginatedOrdersResponse={orders}
@@ -60,4 +60,4 @@ const CustomerOrdersPage = () => {
     );
 };
 
-export default CustomerOrdersPage;
+export default BaristaOrdersPage;
