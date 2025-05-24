@@ -1,3 +1,4 @@
+using PSK2025.Models.DTOs;
 using PSK2025.Models.Entities;
 using PSK2025.Models.Enums;
 
@@ -16,5 +17,9 @@ namespace PSK2025.Data.Repositories.Interfaces
         Task<Order> CreateAsync(Order order);
         Task<Order?> UpdateAsync(Order order);
         Task<bool> DeleteAsync(string id);
+
+        Task<IList<ItemOrderCountDto>> GetItemOrderCountsAsync();
+        Task<IList<TimeSeriesPointDto>> GetOrderCountsOverTimeAsync(DateTime from, DateTime to, TimeGrouping grouping);
+        Task<IList<TimeSeriesPointDto>> GetItemOrderCountsOverTimeAsync(string productId, DateTime from, DateTime to, TimeGrouping grouping);
     }
 }

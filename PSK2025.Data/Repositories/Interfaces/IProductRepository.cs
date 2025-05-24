@@ -7,7 +7,7 @@ namespace PSK2025.Data.Repositories.Interfaces
         Task<(List<Product> Products, int TotalCount)> GetAllAsync(int page = 1, int pageSize = 10);
         Task<Product?> GetByIdAsync(string id);
         Task<Product> CreateAsync(Product item);
-        Task<Product?> UpdateAsync(Product item);
+        Task<(Product? Product, bool ConcurrencyConflict, Product? ConflictingEntity)> UpdateAsync(Product item);
         Task<bool> DeleteAsync(string id);
     }
 }

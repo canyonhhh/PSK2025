@@ -8,7 +8,8 @@ namespace PSK2025.ApiService.Services.Interfaces
         Task<PaginatedResult<ProductDto>> GetAllProductsAsync(int page = 1, int pageSize = 10);
         Task<(ProductDto? Product, ServiceError Error)> GetProductByIdAsync(string id);
         Task<(ProductDto? Product, ServiceError Error)> CreateProductAsync(CreateProductDto model);
-        Task<(ProductDto? Product, ServiceError Error)> UpdateProductAsync(string id, UpdateProductDto model);
+        Task<(ProductDto? Product, ServiceError Error, ProductDto? ConflictingEntity)> UpdateProductAsync(string id, UpdateProductDto model);
+        Task<(ProductDto? Product, ServiceError Error, ProductDto? ConflictingEntity)> UpdateProductAvailabilityAsync(string id, UpdateProductAvailabilityDto model);
         Task<ServiceError> DeleteProductAsync(string id);
     }
 }

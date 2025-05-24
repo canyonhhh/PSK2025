@@ -23,5 +23,8 @@ namespace PSK2025.Models.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime? UpdatedAt { get; set; }
+
+        [Timestamp]
+        public byte[] RowVersion { get; set; } = new byte[0];
     }
 }

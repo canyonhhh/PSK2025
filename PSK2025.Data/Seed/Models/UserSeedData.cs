@@ -2,7 +2,7 @@ namespace PSK2025.Data.Seed.Models
 {
     public class UserSeedData
     {
-        public List<UserAccount> Users { get; set; } = new List<UserAccount>();
+        public List<UserAccount> Users { get; set; } = [];
     }
 
     public class UserAccount
@@ -12,5 +12,6 @@ namespace PSK2025.Data.Seed.Models
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public string Role { get; set; } = "Customer";
+        public string PhoneNumber { get; set; } = string.Empty;
     }
 }
