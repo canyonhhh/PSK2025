@@ -23,6 +23,8 @@ namespace PSK2025.Models.Entities
 
         public OrderStatus Status { get; set; } = OrderStatus.Pending;
 
+        public string? StripePaymentIntentId { get; set; }
+
         [ForeignKey("UserId")]
         public virtual User? User { get; set; }
 

@@ -29,7 +29,10 @@ dotnet user-secrets set "JWT:ValidAudience" "https://localhost" --project PSK202
 dotnet user-secrets set "Twilio:SID" "twilioSid" --project PSK2025.ApiService
 dotnet user-secrets set "Twilio:Token" "twilioToken" --project PSK2025.ApiService
 dotnet user-secrets set "Twilio:PhoneNumber" "twilioNumber" --project PSK2025.ApiService
+dotnet user-secrets set "Stripe:SecretKey" "stripeSecretKey" --project PSK2025.ApiService
 ```
+
+Stripe:SecretKey
 
 ### 3. Set Up the Frontend
 
