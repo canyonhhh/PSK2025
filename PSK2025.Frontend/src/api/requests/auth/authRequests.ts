@@ -8,23 +8,23 @@ const CONTROLLER = "/Auth";
 
 // TODO: Add error handling
 export const loginRequest = async (
-  credentials: LoginDto,
+    credentials: LoginDto,
 ): Promise<LoginResponseDto> => {
-  const response = await api.post<LoginResponseDto>(
-    `${CONTROLLER}/login`,
-    credentials,
-  );
-  return response.data;
+    const response = await api.post<LoginResponseDto>(
+        `${CONTROLLER}/login`,
+        credentials,
+    );
+    return response.data;
 };
 
 export const forgotPasswordRequest = async (
-  credentials: ForgotPasswordDto,
+    credentials: ForgotPasswordDto,
 ): Promise<void> => {
-  await api.post<void>(`${CONTROLLER}/forgot-password`, credentials);
+    await api.post<void>(`${CONTROLLER}/forgot-password`, credentials);
 };
 
 export const changePasswordRequest = async (
-  credentials: ChangePasswordDto,
+    credentials: ChangePasswordDto,
 ): Promise<void> => {
-  await api.post<void>(`${CONTROLLER}/change-password`, credentials);
+    await api.post<void>(`${CONTROLLER}/change-password`, credentials);
 };

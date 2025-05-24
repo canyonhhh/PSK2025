@@ -4,20 +4,24 @@ import { Role } from "./roles";
 import { AppRoutes } from "./appRoutes";
 
 type Props = {
-  authorizeFor: Role;
+    authorizeFor: Role;
 };
 
 const RequireRole = ({ authorizeFor }: Props) => {
-  const { role } = useAuthContext();
-  const location = useLocation();
+    const { role } = useAuthContext();
+    const location = useLocation();
 
-  if (!authorizeFor || authorizeFor !== role) {
-    return (
-      <Navigate to={AppRoutes.NOT_FOUND} state={{ from: location }} replace />
-    );
-  }
+    if (!authorizeFor || authorizeFor !== role) {
+        return (
+            <Navigate
+                to={AppRoutes.NOT_FOUND}
+                state={{ from: location }}
+                replace
+            />
+        );
+    }
 
-  return <Outlet />;
+    return <Outlet />;
 };
 
 export default RequireRole;

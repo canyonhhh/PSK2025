@@ -3,14 +3,16 @@ import { useAuthContext } from "../context/AuthContext";
 import { AppRoutes } from "./appRoutes";
 
 const RequireAuth = () => {
-  const { token } = useAuthContext();
-  const location = useLocation();
+    const { token } = useAuthContext();
+    const location = useLocation();
 
-  if (!token) {
-    return <Navigate to={AppRoutes.LOGIN} state={{ from: location }} replace />;
-  }
+    if (!token) {
+        return (
+            <Navigate to={AppRoutes.LOGIN} state={{ from: location }} replace />
+        );
+    }
 
-  return <Outlet />;
+    return <Outlet />;
 };
 
 export default RequireAuth;

@@ -3,13 +3,13 @@ import Modal from "@mui/material/Modal";
 import Typography from "@mui/material/Typography";
 import { useState } from "react";
 import {
-  Button,
-  FormControl,
-  InputAdornment,
-  InputLabel,
-  OutlinedInput,
-  Snackbar,
-  TextField,
+    Button,
+    FormControl,
+    InputAdornment,
+    InputLabel,
+    OutlinedInput,
+    Snackbar,
+    TextField,
 } from "@mui/material";
 import noProductImage from "../../../no-photos.png";
 import { ProductDto } from "../../../api/types/Product";
@@ -19,133 +19,137 @@ import { UpdateProductDto } from "../../../api/requests/product/types/UpdateProd
 import { keys } from "../../../api/queryKeyFactory";
 
 const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 600,
-  bgcolor: "background.paper",
-  boxShadow: 24,
-  p: 4,
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: 600,
+    bgcolor: "background.paper",
+    boxShadow: 24,
+    p: 4,
 };
 
 interface Props {
-  open: boolean;
-  product: ProductDto;
-  handleCloseEditModal: () => void;
+    open: boolean;
+    product: ProductDto;
+    handleCloseEditModal: () => void;
 }
 
 const ItemEditModal = ({ open, handleCloseEditModal, product }: Props) => {
-  const queryClient = useQueryClient();
-  const [image, setImage] = useState(product.photoUrl ?? "");
-  const [name, setName] = useState(product.title ?? "");
-  const [description, setDescription] = useState(product.description ?? "");
-  const [price, setPrice] = useState(product.price);
-  const [toastMessage, setToastMessage] = useState<string | null>();
-  const { mutate } = useMutation({
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: keys.allProducts }),
-    onError: () => {
-      setToastMessage("Failed to update product");
-    },
-    mutationFn: (params: { product: UpdateProductDto; id: string }) =>
-      updateProduct(params.product, params.id),
-  });
-
-  const handleCloseToast = () => {
-    setToastMessage(null);
-  };
-  const onUpdate = () => {
-    mutate({
-      product: {
-        title: name,
-        price: price,
-        isAvailable: product.isAvailable,
-        description: description,
-        photoUrl: image,
-      },
-      id: product.id,
+    const queryClient = useQueryClient();
+    const [image, setImage] = useState(product.photoUrl ?? "");
+    const [name, setName] = useState(product.title ?? "");
+    const [description, setDescription] = useState(product.description ?? "");
+    const [price, setPrice] = useState(product.price);
+    const [toastMessage, setToastMessage] = useState<string | null>();
+    const { mutate } = useMutation({
+        onSuccess: () =>
+            queryClient.invalidateQueries({ queryKey: keys.allProductsAll }),
+        onError: () => {
+            setToastMessage("Failed to update product");
+        },
+        mutationFn: (params: { product: UpdateProductDto; id: string }) =>
+            updateProduct(params.product, params.id),
     });
-  };
-  return (
-    <div>
-      <Modal
-        open={open}
-        onClose={handleCloseEditModal}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={style}>
-          <Typography
-            id="modal-modal-title"
-            marginBottom="3rem"
-            variant="h6"
-            component="h2"
-          >
-            Edit product
-          </Typography>
-          <Box display="flex" flexDirection="column" gap="1rem">
-            <TextField
-              required
-              type="text"
-              label="Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+
+    const handleCloseToast = () => {
+        setToastMessage(null);
+    };
+    const onUpdate = () => {
+        mutate({
+            product: {
+                title: name,
+                price: price,
+                isAvailable: product.isAvailable,
+                description: description,
+                photoUrl: image,
+            },
+            id: product.id,
+        });
+    };
+    return (
+        <div>
+            <Modal
+                open={open}
+                onClose={handleCloseEditModal}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+            >
+                <Box sx={style}>
+                    <Typography
+                        id="modal-modal-title"
+                        marginBottom="3rem"
+                        variant="h6"
+                        component="h2"
+                    >
+                        Edit product
+                    </Typography>
+                    <Box display="flex" flexDirection="column" gap="1rem">
+                        <TextField
+                            required
+                            type="text"
+                            label="Name"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                        />
+                        <TextField
+                            type="url"
+                            label="Image url"
+                            value={image}
+                            fullWidth
+                            onChange={(e) => setImage(e.target.value)}
+                        />
+                        <Box
+                            component="img"
+                            sx={{
+                                height: 400,
+                                maxHeight: { xs: 233, md: 167 },
+                            }}
+                            src={image ?? noProductImage}
+                        />
+                        <TextField
+                            label="Description"
+                            multiline
+                            value={description}
+                            type="text"
+                            onChange={(e) => setDescription(e.target.value)}
+                        />
+                        <FormControl fullWidth sx={{ m: 1 }}>
+                            <InputLabel htmlFor="outlined-adornment-amount">
+                                Amount
+                            </InputLabel>
+                            <OutlinedInput
+                                required
+                                id="outlined-adornment-amount"
+                                startAdornment={
+                                    <InputAdornment position="start">
+                                        €
+                                    </InputAdornment>
+                                }
+                                label="Price"
+                                value={price}
+                                onChange={(e) =>
+                                    setPrice(Number(e.target.value))
+                                }
+                                type="number"
+                            />
+                        </FormControl>
+                    </Box>
+                    <Box marginTop="2rem">
+                        <Button variant="contained" onClick={onUpdate}>
+                            Update
+                        </Button>
+                    </Box>
+                </Box>
+            </Modal>
+            <Snackbar
+                open={!!toastMessage}
+                autoHideDuration={6000}
+                onClose={handleCloseToast}
+                message={toastMessage}
             />
-            <TextField
-              type="url"
-              label="Image url"
-              value={image}
-              fullWidth
-              onChange={(e) => setImage(e.target.value)}
-            />
-            <Box
-              component="img"
-              sx={{
-                height: 400,
-                maxHeight: { xs: 233, md: 167 },
-              }}
-              src={image ?? noProductImage}
-            />
-            <TextField
-              label="Description"
-              multiline
-              value={description}
-              type="text"
-              onChange={(e) => setDescription(e.target.value)}
-            />
-            <FormControl fullWidth sx={{ m: 1 }}>
-              <InputLabel htmlFor="outlined-adornment-amount">
-                Amount
-              </InputLabel>
-              <OutlinedInput
-                required
-                id="outlined-adornment-amount"
-                startAdornment={
-                  <InputAdornment position="start">€</InputAdornment>
-                }
-                label="Price"
-                value={price}
-                onChange={(e) => setPrice(Number(e.target.value))}
-                type="number"
-              />
-            </FormControl>
-          </Box>
-          <Box marginTop="2rem">
-            <Button variant="contained" onClick={onUpdate}>
-              Update
-            </Button>
-          </Box>
-        </Box>
-      </Modal>
-      <Snackbar
-        open={!!toastMessage}
-        autoHideDuration={6000}
-        onClose={handleCloseToast}
-        message={toastMessage}
-      />
-    </div>
-  );
+        </div>
+    );
 };
 
 export default ItemEditModal;
