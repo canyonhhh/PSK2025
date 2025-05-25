@@ -14,9 +14,9 @@ import CartPage from "./pages/cartPage/CartPage";
 import ManagerOrdersPage from "./pages/ordersPage/ManagerOrdersPage";
 import CustomerOrdersPage from "./pages/customerOrders/CustomerOrdersPage";
 import BaristaOrdersPage from "./pages/baristaOrdersPage/BaristaOrdersPage";
-import OrdersOverTimeChart from "./pages/statisticsPage/OrdersOverTimeTable";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import StatisticsPage from "./pages/statisticsPage/StatisticsPage";
 
 const queryClient = new QueryClient();
 
@@ -50,7 +50,7 @@ function App() {
                                         />
                                         <Route
                                             path={AppRoutes.STATISTICS}
-                                            element={<OrdersOverTimeChart />}
+                                            element={<StatisticsPage />}
                                         />
                                     </Route>
                                     <Route

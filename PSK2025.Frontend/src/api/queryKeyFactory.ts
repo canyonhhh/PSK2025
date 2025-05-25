@@ -26,4 +26,8 @@ export const keys = {
             `from_${from}_to_${to}_grouping_${grouping}`,
         ],
     },
+    topItems: {
+        top: ["top_products"],
+        bottom: ["shit_products"],
+    },
 };

@@ -25,13 +25,13 @@ export const getOrdersOverTime = async (
 export const getOrderedItems = async (
     count: number,
     direction: "descending" | "ascending",
-): Promise<ItemOrderCountDto> => {
+): Promise<ItemOrderCountDto[]> => {
     const params = new URLSearchParams();
 
     if (count !== undefined) params.append("count", `${count}`);
     if (direction !== undefined) params.append("direction", direction);
 
-    const data = await api.get<ItemOrderCountDto>(
+    const data = await api.get<ItemOrderCountDto[]>(
         `${CONTROLLER}/ordered-items?${params.toString()}`,
     );
 
