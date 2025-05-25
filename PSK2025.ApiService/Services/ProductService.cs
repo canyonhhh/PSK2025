@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using PSK2025.ApiService.Services.Interfaces;
 using PSK2025.Data.Repositories.Interfaces;
 using PSK2025.Models.DTOs;
@@ -53,32 +54,52 @@ namespace PSK2025.ApiService.Services
             }
         }
 
-        public async Task<(ProductDto? Product, ServiceError Error)> UpdateProductAsync(string id, UpdateProductDto model)
+        private async Task<(ProductDto? Product, ServiceError Error, ProductDto? ConflictingEntity)> UpdateProductPropertyAsync(
+            string id,
+            Action<Product> updateAction)
         {
             var existingProduct = await productRepository.GetByIdAsync(id);
-
             if (existingProduct == null)
             {
-                return (null, ServiceError.NotFound);
+                return (null, ServiceError.NotFound, null);
             }
 
             try
             {
-                mapper.Map(model, existingProduct);
-                var updatedProduct = await productRepository.UpdateAsync(existingProduct);
+                updateAction(existingProduct);
+
+                existingProduct.UpdatedAt = DateTime.UtcNow;
+
+                var (updatedProduct, concurrencyConflict, conflictingEntity) = await productRepository.UpdateAsync(existingProduct);
+
+                if (concurrencyConflict)
+                {
+                    return (null, ServiceError.ConcurrencyError,
+                           conflictingEntity != null ? mapper.Map<ProductDto>(conflictingEntity) : null);
+                }
 
                 if (updatedProduct == null)
                 {
-                    return (null, ServiceError.DatabaseError);
+                    return (null, ServiceError.DatabaseError, null);
                 }
 
-                return (mapper.Map<ProductDto>(updatedProduct), ServiceError.None);
+                return (mapper.Map<ProductDto>(updatedProduct), ServiceError.None, null);
             }
             catch (Exception ex)
             {
                 logger.LogError($"Error updating product with ID {id}: {ex.Message}");
-                return (null, ServiceError.DatabaseError);
+                return (null, ServiceError.DatabaseError, null);
             }
+        }
+
+        public async Task<(ProductDto? Product, ServiceError Error, ProductDto? ConflictingEntity)> UpdateProductAsync(string id, UpdateProductDto model)
+        {
+            return await UpdateProductPropertyAsync(id, product => mapper.Map(model, product));
+        }
+
+        public async Task<(ProductDto? Product, ServiceError Error, ProductDto? ConflictingEntity)> UpdateProductAvailabilityAsync(string id, UpdateProductAvailabilityDto model)
+        {
+            return await UpdateProductPropertyAsync(id, product => product.IsAvailable = model.IsAvailable);
         }
 
         public async Task<ServiceError> DeleteProductAsync(string id)

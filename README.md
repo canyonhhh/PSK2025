@@ -26,7 +26,9 @@ dotnet user-secrets init --project PSK2025.ApiService
 dotnet user-secrets set "JWT:Secret" "YourDevelopmentSecretKey1234567890123456789012" --project PSK2025.ApiService
 dotnet user-secrets set "JWT:ValidIssuer" "https://localhost" --project PSK2025.ApiService
 dotnet user-secrets set "JWT:ValidAudience" "https://localhost" --project PSK2025.ApiService
-dotnet user-secrets set "JWT:ExpirationInDays" "7" --project PSK2025.ApiService
+dotnet user-secrets set "Twilio:SID" "twilioSid" --project PSK2025.ApiService
+dotnet user-secrets set "Twilio:Token" "twilioToken" --project PSK2025.ApiService
+dotnet user-secrets set "Twilio:PhoneNumber" "twilioNumber" --project PSK2025.ApiService
 ```
 
 ### 3. Set Up the Frontend
