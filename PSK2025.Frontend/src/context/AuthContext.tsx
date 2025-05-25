@@ -11,6 +11,7 @@ interface TokenPayload {
 interface AuthContextValues {
     token: string | null;
     role: Role | null;
+    id: string | null;
     login: (token: string) => void;
     logout: () => void;
 }
@@ -27,6 +28,7 @@ const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
     );
 
     let role: Role | null = null;
+    let id: string | null = null;
 
     if (token) {
         const decoded = jwtDecode<TokenPayload>(token);
@@ -36,6 +38,10 @@ const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
                     "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
                 ] as string) ?? "";
             role = roleToRoleEnum[smt];
+            id =
+                ((decoded as any)[
+                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
+                ] as string) ?? "";
         }
     }
 
@@ -53,10 +59,14 @@ const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
                 "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
             ] as string) ?? "";
         role = roleToRoleEnum[smt];
+        id =
+            ((decoded as any)[
+                "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
+            ] as string) ?? "";
     };
 
     return (
-        <AuthContext.Provider value={{ token, logout, login, role }}>
+        <AuthContext.Provider value={{ token, logout, login, role, id }}>
             {children}
         </AuthContext.Provider>
     );

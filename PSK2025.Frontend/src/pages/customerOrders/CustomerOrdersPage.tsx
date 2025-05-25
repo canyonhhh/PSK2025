@@ -4,9 +4,11 @@ import { fetchOrders } from "../../api/requests/order/orderRequests";
 import { keys } from "../../api/queryKeyFactory";
 import { Alert, Box, CircularProgress, Typography } from "@mui/material";
 import OrdersTable from "../../components/ordersTable/OrdersTable";
+import { useAuthContext } from "../../context/AuthContext";
 
 const CustomerOrdersPage = () => {
     const queryClient = useQueryClient();
+    const { id: userId } = useAuthContext();
     const [currentPage, setCurrentPage] = useState(1);
     // TODO: use these fields for sorting
     const [ascending, setAscending] = useState(true);
@@ -21,7 +23,14 @@ const CustomerOrdersPage = () => {
     } = useQuery({
         queryKey: keys.orders.page(currentPage),
         queryFn: () =>
-            fetchOrders(currentPage, 16, undefined, status, sortBy, ascending),
+            fetchOrders(
+                currentPage,
+                16,
+                userId ?? undefined,
+                status,
+                sortBy,
+                ascending,
+            ),
     });
 
     useEffect(() => {
