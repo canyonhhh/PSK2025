@@ -10,12 +10,12 @@ namespace PSK2025.ApiService.Services
 {
     public class ProductService(IProductRepository productRepository, IMapper mapper, ILogger<IProductService> logger) : IProductService
     {
-        public async Task<PaginatedResult<ProductDto>> GetAllProductsAsync(int page = 1, int pageSize = 10)
+        public async Task<PaginatedResult<ProductDto>> GetAllProductsAsync(string? name, int page = 1, int pageSize = 10)
         {
             page = Math.Max(1, page);
             pageSize = Math.Clamp(pageSize, 1, 50);
 
-            var (products, totalCount) = await productRepository.GetAllAsync(page, pageSize);
+            var (products, totalCount) = await productRepository.GetAllAsync(name, page, pageSize);
             var productDtos = mapper.Map<List<ProductDto>>(products);
 
             return new PaginatedResult<ProductDto>
