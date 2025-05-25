@@ -2,13 +2,15 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PSK2025.ApiService.Services.Interfaces;
 using PSK2025.Models.DTOs;
+using PSK2025.Models.Enums;
+using PSK2025.Models.Extensions;
 using visus.Models.DTOs;
 
 namespace PSK2025.ApiService.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class AuthController(IAuthService authService) : ControllerBase
+    public class AuthController(IAuthService authService, IGetUserIdService getUserIdService) : ControllerBase
     {
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto model)
@@ -18,14 +20,16 @@ namespace PSK2025.ApiService.Controllers
                 return BadRequest(ModelState);
             }
 
-            var (succeeded, token, errors) = await authService.LoginAsync(model);
+            var (error, token) = await authService.LoginAsync(model);
 
-            if (succeeded)
+            if (error == ServiceError.None)
             {
                 return Ok(new { token });
             }
 
-            return Unauthorized(new { errors });
+            return StatusCode(
+                error.GetStatusCode(),
+                error.GetErrorMessage("Login"));
         }
 
         [HttpPost("forgot-password")]
@@ -36,9 +40,16 @@ namespace PSK2025.ApiService.Controllers
                 return BadRequest(ModelState);
             }
 
-            await authService.ForgotPasswordAsync(model.Email);
+            var error = await authService.ForgotPasswordAsync(model.Email);
 
-            return Ok();
+            if (error == ServiceError.None)
+            {
+                return Ok();
+            }
+
+            return StatusCode(
+                error.GetStatusCode(),
+                error.GetErrorMessage("Password reset"));
         }
 
         [HttpPost("reset-password")]
@@ -49,14 +60,16 @@ namespace PSK2025.ApiService.Controllers
                 return BadRequest(ModelState);
             }
 
-            var (succeeded, errors) = await authService.ResetPasswordAsync(model.UserId, model.Token, model.NewPassword);
+            var error = await authService.ResetPasswordAsync(model.UserId, model.Token, model.NewPassword);
 
-            if (succeeded)
+            if (error == ServiceError.None)
             {
                 return Ok();
             }
 
-            return BadRequest(new { errors });
+            return StatusCode(
+                error.GetStatusCode(),
+                error.GetErrorMessage("Password reset"));
         }
 
         [HttpPost("change-password")]
@@ -68,20 +81,17 @@ namespace PSK2025.ApiService.Controllers
                 return BadRequest(ModelState);
             }
 
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized();
-            }
+            var userId = getUserIdService.GetUserIdFromToken();
+            var error = await authService.ChangePasswordAsync(userId, model.CurrentPassword, model.NewPassword);
 
-            var (succeeded, errors) = await authService.ChangePasswordAsync(userId, model.CurrentPassword, model.NewPassword);
-
-            if (succeeded)
+            if (error == ServiceError.None)
             {
                 return Ok();
             }
 
-            return BadRequest(new { errors });
+            return StatusCode(
+                error.GetStatusCode(),
+                error.GetErrorMessage("Password change"));
         }
     }
 }

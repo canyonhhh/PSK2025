@@ -3,45 +3,61 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PSK2025.ApiService.Services.Interfaces;
 using PSK2025.Models.DTOs;
+using PSK2025.Models.Enums;
+using PSK2025.Models.Extensions;
 
 namespace PSK2025.ApiService.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class UserController(IUserService userService, IAuthService authService, IMapper mapper) : ControllerBase
+    public class UserController(IUserService userService, IAuthService authService, IMapper mapper, IGetUserIdService getUserIdService) : ControllerBase
     {
         [HttpGet]
         [Authorize(Roles = "Manager")]
-        public async Task<IActionResult> GetAllUsers()
+        public async Task<IActionResult> GetAllUsers(
+            [FromQuery] string? email = null,
+            [FromQuery] string? role = null,
+            [FromQuery] UserSortBy sortBy = UserSortBy.CreatedAt,
+            [FromQuery] bool ascending = false,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
         {
-            var users = await userService.GetAllUsersAsync();
-            return Ok(users);
+            var result = await userService.GetAllUsersAsync(email, role, sortBy, ascending, page, pageSize);
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
         [Authorize]
         public async Task<IActionResult> GetUser(string id)
         {
-            var user = await userService.GetUserByIdAsync(id);
-            if (user == null)
+            var currentUserId = getUserIdService.GetUserIdFromToken();
+            if (id != currentUserId && !User.IsInRole("Manager"))
             {
-                return NotFound();
+                return Forbid();
             }
 
-            return Ok(user);
+            var (user, error) = await userService.GetUserByIdAsync(id);
+
+            if (error == ServiceError.None)
+                return Ok(user);
+
+            return StatusCode(
+                error.GetStatusCode(),
+                error.GetErrorMessage("User"));
         }
 
         [HttpGet("email/{email}")]
-        [Authorize]
+        [Authorize(Roles = "Manager")]
         public async Task<IActionResult> GetUserByEmail(string email)
         {
-            var user = await userService.GetUserByEmailAsync(email);
-            if (user == null)
-            {
-                return NotFound();
-            }
+            var (user, error) = await userService.GetUserByEmailAsync(email);
 
-            return Ok(user);
+            if (error == ServiceError.None)
+                return Ok(user);
+
+            return StatusCode(
+                error.GetStatusCode(),
+                error.GetErrorMessage("User"));
         }
 
         [HttpPost]
@@ -52,25 +68,26 @@ namespace PSK2025.ApiService.Controllers
                 return BadRequest(ModelState);
             }
 
-            var (succeeded, user, errors) = await userService.RegisterUserAsync(model);
+            var (user, error) = await userService.RegisterUserAsync(model);
 
-
-            if (!succeeded)
+            if (error != ServiceError.None)
             {
-                return BadRequest(new { errors });
+                return StatusCode(
+                    error.GetStatusCode(),
+                    error.GetErrorMessage("User"));
             }
 
             var loginDto = mapper.Map<LoginDto>(model);
+            var (loginError, token) = await authService.LoginAsync(loginDto);
 
-            var (loginSucceeded, token, loginErrors) = await authService.LoginAsync(loginDto);
-
-            if (!loginSucceeded)
+            if (loginError != ServiceError.None)
             {
-                return BadRequest(new { loginErrors });
+                return StatusCode(
+                    loginError.GetStatusCode(),
+                    loginError.GetErrorMessage("Login"));
             }
 
             return CreatedAtAction(nameof(GetUser), new { id = user!.Id }, new { token });
-
         }
 
         [HttpPut("{id}")]
@@ -79,61 +96,56 @@ namespace PSK2025.ApiService.Controllers
         {
             if (!ModelState.IsValid)
             {
-
                 return BadRequest(ModelState);
             }
 
-            var (succeeded, user, errors) = await userService.UpdateUserAsync(id, model);
-
-            if (succeeded)
+            var currentUserId = getUserIdService.GetUserIdFromToken();
+            if (id != currentUserId && !User.IsInRole("Manager"))
             {
+                return Forbid();
+            }
+
+            var (user, error) = await userService.UpdateUserAsync(id, model);
+
+            if (error == ServiceError.None)
                 return Ok(user);
-            }
 
-            if (errors.Contains("User not found"))
-            {
-                return NotFound();
-            }
-
-            return BadRequest(new { errors });
+            return StatusCode(
+                error.GetStatusCode(),
+                error.GetErrorMessage("User"));
         }
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "Manager")]
         public async Task<IActionResult> DeleteUser(string id)
         {
-            var (succeeded, errors) = await userService.DeleteUserAsync(id);
+            var error = await userService.DeleteUserAsync(id);
 
-            if (succeeded)
-            {
+            if (error == ServiceError.None)
                 return NoContent();
-            }
 
-            if (errors.Contains("User not found"))
-            {
-                return NotFound();
-            }
-
-            return BadRequest(new { errors });
+            return StatusCode(
+                error.GetStatusCode(),
+                error.GetErrorMessage("User"));
         }
 
-        [HttpPut("{id}/change-role")]
+        [HttpPut("{id}/role")]
         [Authorize(Roles = "Manager")]
-        public async Task<IActionResult> ChangeUserRole(string id, [FromBody] string newRole)
+        public async Task<IActionResult> ChangeUserRole(string id, [FromBody] ChangeUserRoleDto model)
         {
-            var (succeeded, user, errors) = await userService.ChangeUserRoleAsync(id, newRole);
-
-            if (succeeded)
+            if (!ModelState.IsValid)
             {
+                return BadRequest(ModelState);
+            }
+
+            var (user, error) = await userService.ChangeUserRoleAsync(id, model.Role);
+
+            if (error == ServiceError.None)
                 return Ok(user);
-            }
 
-            if (errors.Contains("User not found"))
-            {
-                return NotFound();
-            }
-
-            return BadRequest(new { errors });
+            return StatusCode(
+                error.GetStatusCode(),
+                error.GetErrorMessage("User"));
         }
     }
 }
