@@ -63,11 +63,12 @@ namespace PSK2025.ApiService.Services.Decorators
         {
             try
             {
-                var user = await userService.GetUserByIdAsync(order.UserId);
+                var (user, error) = await userService.GetUserByIdAsync(order.UserId);
 
-                if (user == null)
+                if (error != ServiceError.None || user == null)
                 {
-                    logger.LogWarning("Cannot send SMS notification: User not found for order {OrderId}", order.Id);
+                    logger.LogWarning("Cannot send SMS notification: User not found for order {OrderId}. Error: {Error}",
+                        order.Id, error);
                     return;
                 }
 

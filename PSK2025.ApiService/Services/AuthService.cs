@@ -4,6 +4,7 @@ using PSK2025.ApiService.Services.Interfaces;
 using PSK2025.Data.Repositories.Interfaces;
 using PSK2025.Models.DTOs;
 using PSK2025.Models.Entities;
+using PSK2025.Models.Enums;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -13,78 +14,90 @@ namespace PSK2025.ApiService.Services
     public class AuthService(
         IUserRepository userRepository,
         UserManager<User> userManager,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        ILogger<AuthService> logger)
         : IAuthService
     {
-        public async Task<(bool Succeeded, string Token, string[] Errors)> LoginAsync(LoginDto model)
+        private readonly IUserRepository _userRepository = userRepository;
+        private readonly UserManager<User> _userManager = userManager;
+        private readonly IConfiguration _configuration = configuration;
+        private readonly ILogger<AuthService> _logger = logger;
+
+        public async Task<(ServiceError Error, string Token)> LoginAsync(LoginDto model)
         {
-            var user = await userRepository.GetByEmailAsync(model.Email);
-
-            if (user == null)
+            try
             {
-                return (false, string.Empty, ["User does not exist"]);
+                var user = await _userRepository.GetByEmailAsync(model.Email);
+                if (user == null)
+                {
+                    return (ServiceError.Unauthorized, string.Empty);
+                }
+
+                var result = await _userRepository.CheckPasswordAsync(user, model.Password);
+                if (!result)
+                {
+                    return (ServiceError.Unauthorized, string.Empty);
+                }
+
+                var token = await GenerateJwtToken(user);
+                return (ServiceError.None, token);
             }
-
-            var result = await userRepository.CheckPasswordAsync(user, model.Password);
-
-            if (!result)
+            catch (Exception ex)
             {
-                return (false, string.Empty, ["Invalid password"]);
+                _logger.LogError(ex, "Error during login for user {Email}", model.Email);
+                return (ServiceError.DatabaseError, string.Empty);
             }
-
-            var token = await GenerateJwtToken(user);
-
-            return (true, token, []);
         }
 
-        public Task<(bool Succeeded, string[] Errors)> ForgotPasswordAsync(string email)
+        public Task<ServiceError> ForgotPasswordAsync(string email)
         {
-            // TODO : Implement email sending logic
+            // TODO: Implement email sending logic
             throw new NotImplementedException("Email sending is not implemented yet.");
-
-            /*
-                        var user = await _userRepository.GetByEmailAsync(email);
-                        if (user == null)
-                        {
-                            return (true, Array.Empty<string>());
-                        }
-
-                        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-
-
-                        return (true, Array.Empty<string>());
-            */
         }
 
-        public async Task<(bool Succeeded, string[] Errors)> ResetPasswordAsync(string userId, string token,
-            string newPassword)
+        public async Task<ServiceError> ResetPasswordAsync(string userId, string token, string newPassword)
         {
-            var user = await userRepository.GetByIdAsync(userId);
-            if (user == null)
+            try
             {
-                return (false, ["User not found"]);
-            }
+                var user = await _userRepository.GetByIdAsync(userId);
+                if (user == null)
+                {
+                    return ServiceError.NotFound;
+                }
 
-            var result = await userManager.ResetPasswordAsync(user, token, newPassword);
-            return (result.Succeeded, result.Errors.Select(e => e.Description).ToArray());
+                var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+                return result.Succeeded ? ServiceError.None : ServiceError.InvalidData;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error resetting password for user {UserId}", userId);
+                return ServiceError.DatabaseError;
+            }
         }
 
-        public async Task<(bool Succeeded, string[] Errors)> ChangePasswordAsync(string userId, string currentPassword,
-            string newPassword)
+        public async Task<ServiceError> ChangePasswordAsync(string userId, string currentPassword, string newPassword)
         {
-            var user = await userRepository.GetByIdAsync(userId);
-            if (user == null)
+            try
             {
-                return (false, ["User not found"]);
-            }
+                var user = await _userRepository.GetByIdAsync(userId);
+                if (user == null)
+                {
+                    return ServiceError.NotFound;
+                }
 
-            var result = await userManager.ChangePasswordAsync(user, currentPassword, newPassword);
-            return (result.Succeeded, result.Errors.Select(e => e.Description).ToArray());
+                var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+                return result.Succeeded ? ServiceError.None : ServiceError.InvalidData;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error changing password for user {UserId}", userId);
+                return ServiceError.DatabaseError;
+            }
         }
 
         private async Task<string> GenerateJwtToken(User user)
         {
-            var roles = await userManager.GetRolesAsync(user);
+            var roles = await _userManager.GetRolesAsync(user);
 
             var claims = new List<Claim>
             {
@@ -108,17 +121,17 @@ namespace PSK2025.ApiService.Services
                 claims.Add(new Claim(ClaimTypes.Surname, user.LastName));
             }
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"] ??
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"] ??
                                                                       throw new ArgumentException(
                                                                           "JWT:Secret is not configured")));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expires = DateTime.Now.AddDays(double.Parse(configuration["JWT:ExpirationInDays"] ??
+            var expires = DateTime.Now.AddDays(double.Parse(_configuration["JWT:ExpirationInDays"] ??
                                                             throw new ArgumentException(
                                                                 "JWT:ExpirationInDays is not configured")));
 
             var token = new JwtSecurityToken(
-                issuer: configuration["JWT:ValidIssuer"],
-                audience: configuration["JWT:ValidAudience"],
+                issuer: _configuration["JWT:ValidIssuer"],
+                audience: _configuration["JWT:ValidAudience"],
                 claims: claims,
                 expires: expires,
                 signingCredentials: creds
