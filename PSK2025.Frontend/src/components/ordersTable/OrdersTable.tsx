@@ -16,7 +16,11 @@ import {
 import { PaginatedResponse } from "../../api/types/PaginatedResposeDto";
 import { OrderDto } from "../../api/requests/order/types/OrderDto";
 import { PaginatedItems } from "../paginatedItemBox/PaginatedItemBox";
-import { ORDER_STATUSES } from "./OrderTable.types";
+import {
+    ASCENDING_OPTIONS,
+    ORDER_STATUSES,
+    SORT_BY_OPTIONS,
+} from "./OrderTable.types";
 import { OrdersTableRow } from "./OrdersTableRow";
 
 interface OrdersTableProps {
@@ -24,6 +28,12 @@ interface OrdersTableProps {
     setCurrentPage: (page: number) => void;
     status: number | undefined;
     setStatus: (status: number | undefined) => void;
+    ascending: boolean;
+    setAscending: (value: boolean) => void;
+    sortBy: number | undefined;
+    setSortBy: (value: number | undefined) => void;
+    canChangeStatus?: boolean;
+    doNotRenderFilters?: boolean;
 }
 
 const OrdersTable = ({
@@ -31,10 +41,14 @@ const OrdersTable = ({
     setCurrentPage,
     status,
     setStatus,
+    ascending,
+    setAscending,
+    sortBy,
+    setSortBy,
+    canChangeStatus,
+    doNotRenderFilters,
 }: OrdersTableProps) => {
     const handleStatusChange = (event: any) => {
-        console.log(Number(event.target.value));
-
         if (event.target.value !== status) {
             setStatus(
                 event.target.value === "all"
@@ -44,8 +58,26 @@ const OrdersTable = ({
         }
     };
 
+    const handleSortByChange = (event: any) => {
+        if (event.target.value !== sortBy) {
+            setSortBy(
+                event.target.value === "none"
+                    ? undefined
+                    : Number(event.target.value),
+            );
+        }
+    };
+
+    const handleAscendingChange = (event: any) => {
+        if (event.target.value !== ascending) {
+            setAscending(Number(event.target.value) === 0 ? true : false);
+        }
+    };
+
     const renderOrdersTableRow = (order: OrderDto) => {
-        return <OrdersTableRow order={order} />;
+        return (
+            <OrdersTableRow order={order} canChangeSatus={canChangeStatus} />
+        );
     };
 
     const renderContainer = (items: React.ReactNode[]) => {
@@ -89,15 +121,19 @@ const OrdersTable = ({
         return;
     };
 
-    return (
-        <>
+    const renderFilters = () => {
+        if (doNotRenderFilters) {
+            return null;
+        }
+        return (
             <Box
                 display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-                mb={2}
+                justifyContent="start"
+                flexDirection="column"
+                gap={1}
+                m={2}
             >
-                <FormControl size="small" sx={{ minWidth: 180 }}>
+                <FormControl size="small" sx={{ minWidth: 180, maxWidth: 300 }}>
                     <InputLabel>Status</InputLabel>
                     <Select
                         label="Status"
@@ -112,8 +148,42 @@ const OrdersTable = ({
                         ))}
                     </Select>
                 </FormControl>
+                <FormControl size="small" sx={{ minWidth: 180, maxWidth: 300 }}>
+                    <InputLabel>Sort by</InputLabel>
+                    <Select
+                        label="Sort by"
+                        value={sortBy !== undefined ? sortBy : "none"}
+                        onChange={handleSortByChange}
+                    >
+                        <MenuItem value="none">None</MenuItem>
+                        {SORT_BY_OPTIONS.map((s) => (
+                            <MenuItem key={s.value} value={s.value}>
+                                {s.label}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+                <FormControl size="small" sx={{ minWidth: 180, maxWidth: 300 }}>
+                    <InputLabel>Direction</InputLabel>
+                    <Select
+                        label="Direction"
+                        value={ascending ? 0 : 1}
+                        onChange={handleAscendingChange}
+                    >
+                        {ASCENDING_OPTIONS.map((s) => (
+                            <MenuItem key={s.value} value={s.value}>
+                                {s.label}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
             </Box>
+        );
+    };
 
+    return (
+        <>
+            {renderFilters()}
             {renderOrders()}
         </>
     );

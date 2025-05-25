@@ -13,6 +13,8 @@ import { ProductMenu } from "./components/productMenu/ProductMenu";
 import CartPage from "./pages/cartPage/CartPage";
 import ManagerOrdersPage from "./pages/ordersPage/ManagerOrdersPage";
 import CustomerOrdersPage from "./pages/customerOrders/CustomerOrdersPage";
+import BaristaOrdersPage from "./pages/baristaOrdersPage/BaristaOrdersPage";
+import StatisticsPage from "./pages/statisticsPage/StatisticsPage";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +45,10 @@ function App() {
                                         path={AppRoutes.ALL_ORDERS}
                                         element={<ManagerOrdersPage />}
                                     />
+                                    <Route
+                                        path={AppRoutes.STATISTICS}
+                                        element={<StatisticsPage />}
+                                    />
                                 </Route>
                                 <Route
                                     element={
@@ -53,7 +59,7 @@ function App() {
                                 >
                                     <Route
                                         path={AppRoutes.BARISTA_ORDERS}
-                                        element={<></>}
+                                        element={<BaristaOrdersPage />}
                                     />
                                 </Route>
                                 <Route

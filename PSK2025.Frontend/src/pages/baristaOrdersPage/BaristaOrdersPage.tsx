@@ -8,8 +8,7 @@ import OrdersTable from "../../components/ordersTable/OrdersTable";
 const BaristaOrdersPage = () => {
     const queryClient = useQueryClient();
     const [currentPage, setCurrentPage] = useState(1);
-    // TODO: use these fields for sorting
-    const [ascending, setAscending] = useState(true);
+    const [ascending, setAscending] = useState(false);
     const [sortBy, setSortBy] = useState<number | undefined>(undefined);
     const [status, setStatus] = useState<number | undefined>(undefined);
 
@@ -22,13 +21,14 @@ const BaristaOrdersPage = () => {
         queryKey: keys.orders.page(currentPage),
         queryFn: () =>
             fetchOrders(currentPage, 16, undefined, status, sortBy, ascending),
+        refetchInterval: 5000,
     });
 
     useEffect(() => {
         queryClient.invalidateQueries({ queryKey: keys.orders.all });
-    }, [status, queryClient]);
+    }, [status, ascending, sortBy, status, queryClient]);
 
-    if (isLoading || isFetching) {
+    if (isLoading) {
         return (
             <Box
                 display="flex"
@@ -48,13 +48,18 @@ const BaristaOrdersPage = () => {
     return (
         <Box>
             <Typography variant="h4" gutterBottom>
-                Current Active Orders
+                Current Orders
             </Typography>
             <OrdersTable
                 paginatedOrdersResponse={orders}
                 setCurrentPage={setCurrentPage}
                 status={status}
                 setStatus={setStatus}
+                ascending={ascending}
+                setAscending={setAscending}
+                sortBy={sortBy}
+                setSortBy={setSortBy}
+                canChangeStatus
             />
         </Box>
     );

@@ -74,6 +74,7 @@ export default function RegisterPage() {
     const [repeatPassword, setRepeatPassword] = useState("");
     const [firstName, setFirstname] = useState("");
     const [lastName, setLastName] = useState("");
+    const [phoneNumber, setPhoneNumber] = useState("");
 
     const [emailError, setEmailError] = useState(false);
     const [emailErrorMessage, setEmailErrorMessage] = useState("");
@@ -81,6 +82,7 @@ export default function RegisterPage() {
         useState("");
     const [passwordError, setPasswordError] = useState(false);
     const [passwordErrorMessage, setPasswordErrorMessage] = useState("");
+    const [phoneNumberErrorMessage, setPhoneNumberErrorMessage] = useState("");
     const [open, setOpen] = useState(false);
     const [firstNameErrorMessage, setFirstNameErrorMessage] = useState("");
     const [lastNameErrorMessage, setLastNameErrorMessage] = useState("");
@@ -101,10 +103,11 @@ export default function RegisterPage() {
             return;
         }
         request.mutate({
-            Email: email,
-            Password: password,
-            FirstName: firstName,
-            LastName: lastName,
+            email: email,
+            password: password,
+            firstName: firstName,
+            lastName: lastName,
+            phoneNumber: phoneNumber,
         });
     };
 
@@ -147,6 +150,12 @@ export default function RegisterPage() {
             setRepeatPasswordErrorMessage("Entered password do not match");
         } else {
             setRepeatPasswordErrorMessage("");
+        }
+
+        if (!phoneNumber) {
+            setPhoneNumberErrorMessage("Please enter a valid phone number");
+        } else {
+            setPhoneNumberErrorMessage("");
         }
 
         return isValid;
@@ -230,6 +239,28 @@ export default function RegisterPage() {
                             color={lastNameErrorMessage ? "error" : "primary"}
                             value={lastName}
                             onChange={(e) => setLastName(e.target.value)}
+                        />
+                    </FormControl>
+                    <FormControl>
+                        <FormLabel htmlFor="phoneNumber">
+                            Phone Number
+                        </FormLabel>
+                        <TextField
+                            error={!!phoneNumberErrorMessage}
+                            helperText={phoneNumberErrorMessage}
+                            id="phoneNumber"
+                            type="tel"
+                            name="phoneNumber"
+                            placeholder="370********"
+                            autoFocus
+                            required
+                            fullWidth
+                            variant="outlined"
+                            color={
+                                phoneNumberErrorMessage ? "error" : "primary"
+                            }
+                            value={phoneNumber}
+                            onChange={(e) => setPhoneNumber(e.target.value)}
                         />
                     </FormControl>
                     <FormControl>

@@ -35,7 +35,7 @@ const CustomerOrdersPage = () => {
 
     useEffect(() => {
         queryClient.invalidateQueries({ queryKey: keys.orders.all });
-    }, [status, queryClient]);
+    }, [status, ascending, sortBy, status, queryClient]);
 
     if (isLoading || isFetching) {
         return (
@@ -64,6 +64,10 @@ const CustomerOrdersPage = () => {
                 setCurrentPage={setCurrentPage}
                 status={status}
                 setStatus={setStatus}
+                ascending={ascending}
+                setAscending={setAscending}
+                sortBy={sortBy}
+                setSortBy={setSortBy}
             />
         </Box>
     );
