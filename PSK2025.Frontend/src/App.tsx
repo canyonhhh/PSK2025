@@ -17,6 +17,7 @@ import BaristaOrdersPage from "./pages/baristaOrdersPage/BaristaOrdersPage";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import StatisticsPage from "./pages/statisticsPage/StatisticsPage";
+import BaristaPage from "./pages/baristaPage/BaristaPage";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +52,10 @@ function App() {
                                         <Route
                                             path={AppRoutes.STATISTICS}
                                             element={<StatisticsPage />}
+                                        />
+                                        <Route
+                                            path={AppRoutes.EMPLOYEES}
+                                            element={<BaristaPage />}
                                         />
                                     </Route>
                                     <Route

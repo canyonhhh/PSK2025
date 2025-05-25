@@ -9,7 +9,7 @@ const CONTROLLER = "/User";
 
 // TODO: Add error handling
 export const fetchAllUsers = async (): Promise<UserDto[]> => {
-    const response = await api.get<UserDto[]>(CONTROLLER);
+    const response = await api.get<UserDto[]>(`${CONTROLLER}?role=1`);
     return response.data;
 };
 
@@ -46,9 +46,8 @@ export const changeRoleReuqest = async (
     id: string,
     newRole: UserRole,
 ): Promise<UserDto> => {
-    const response = await api.put<UserDto>(
-        `${CONTROLLER}/${id}/change-role`,
-        newRole,
-    );
+    const response = await api.put<UserDto>(`${CONTROLLER}/${id}/role`, {
+        role: newRole,
+    });
     return response.data;
 };

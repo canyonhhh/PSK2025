@@ -30,4 +30,5 @@ export const keys = {
         top: ["top_products"],
         bottom: ["shit_products"],
     },
+    employees: ["employees"],
 };

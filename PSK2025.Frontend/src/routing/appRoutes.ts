@@ -7,5 +7,6 @@ export enum AppRoutes {
     ALL_ORDERS = "/orders",
     BARISTA_ORDERS = "/live-orders",
     STATISTICS = "/statistics",
+    EMPLOYEES = "/employees",
     NOT_FOUND = "*",
 }
