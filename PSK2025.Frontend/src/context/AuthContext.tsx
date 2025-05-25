@@ -4,7 +4,7 @@ import { jwtDecode } from "jwt-decode";
 
 export const AUTH_TOKEN_KEY = "api_auth";
 
-interface TokenPayload {
+export interface TokenPayload {
     role: string;
 }
 

@@ -47,7 +47,6 @@ const OrdersOverTimeChart = () => {
                 Orders Over Time
             </Typography>
 
-            {/* Date Pickers */}
             <Grid container spacing={2} mb={3}>
                 <Grid size={{ xs: 12, sm: 6 }}>
                     <DatePicker

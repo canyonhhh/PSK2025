@@ -20,6 +20,7 @@ const ProductMenuItem = ({ product }: ShopMenuItemProps) => {
     const { role } = useAuthContext();
     const [open, setOpen] = useState(false);
     const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
+    const [inStock, setInStock] = useState(true);
     const handleOpenEditModal = () => setOpen(true);
     const handleCloseEditModal = () => setOpen(false);
     const [toastMessage, setToastMessage] = useState<string | null>();
@@ -29,6 +30,8 @@ const ProductMenuItem = ({ product }: ShopMenuItemProps) => {
         onSuccess: () =>
             queryClient.invalidateQueries({ queryKey: keys.allProductsAll }),
     });
+
+    const markItemOutOfStock = () => setInStock((isInStock) => !isInStock);
 
     const { mutate: addToCartMutation } = useMutation({
         mutationFn: () =>
@@ -81,18 +84,9 @@ const ProductMenuItem = ({ product }: ShopMenuItemProps) => {
             );
         } else if (role == Role.BARISTA) {
             return (
-                <>
-                    <Button variant="outlined" onClick={handleOpenEditModal}>
-                        Edit
-                    </Button>
-                    <Button
-                        variant="contained"
-                        color="error"
-                        onClick={() => setIsConfirmationOpen(true)}
-                    >
-                        Delete
-                    </Button>
-                </>
+                <Button variant="outlined" onClick={markItemOutOfStock}>
+                    {inStock ? "Mark out of stock" : "Mark in stock"}
+                </Button>
             );
         }
     };

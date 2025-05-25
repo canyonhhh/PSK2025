@@ -1,4 +1,5 @@
 import api from "../../api";
+import { PaginatedResponse } from "../../types/PaginatedResposeDto";
 import { LoginResponseDto } from "../auth/types/LoginResponseDto";
 import { RegisterDto } from "./types/RegisterDto";
 import { UpdateUserDto } from "./types/UpdateUserDto";
@@ -8,8 +9,13 @@ import { UserRole } from "./types/UserRoles";
 const CONTROLLER = "/User";
 
 // TODO: Add error handling
-export const fetchAllUsers = async (): Promise<UserDto[]> => {
-    const response = await api.get<UserDto[]>(`${CONTROLLER}?role=1`);
+export const fetchAllUsers = async (
+    page: number,
+    rowsPerPage: number,
+): Promise<PaginatedResponse<UserDto>> => {
+    const response = await api.get<PaginatedResponse<UserDto>>(
+        `${CONTROLLER}?role=Barista&page=${page}&pageSize=${rowsPerPage}`,
+    );
     return response.data;
 };
 

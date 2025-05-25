@@ -45,6 +45,9 @@ const CartPage = () => {
             queryClient.invalidateQueries({
                 queryKey: keys.ordersByUser(authContext.token ?? ""),
             });
+            queryClient.invalidateQueries({
+                queryKey: keys.activeCart,
+            });
         },
     });
 

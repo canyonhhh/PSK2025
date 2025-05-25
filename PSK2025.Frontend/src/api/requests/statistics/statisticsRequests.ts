@@ -43,15 +43,15 @@ export const getItemOverTime = async (
     from: string,
     to: string,
     grouping: number,
-): Promise<ItemOrderCountDto> => {
+): Promise<ChartPoint[]> => {
     const params = new URLSearchParams();
 
     if (from !== undefined) params.append("from", from);
     if (to !== undefined) params.append("to", to);
     if (grouping !== undefined) params.append("grouping", `${grouping}`);
 
-    const data = await api.get<ItemOrderCountDto>(
-        `${CONTROLLER}item/${productId}/over-time?${params.toString()}`,
+    const data = await api.get<ChartPoint[]>(
+        `${CONTROLLER}/item/${productId}/over-time?${params.toString()}`,
     );
 
     return data.data;

@@ -10,9 +10,11 @@ const CONTROLLER = "/Product";
 export const fetchAllProducts = async (
     page: number,
     itemPerPage: number,
+    name?: string,
 ): Promise<PaginatedResponse<ProductDto>> => {
     const response = await api.get<PaginatedResponse<ProductDto>>(
-        `${CONTROLLER}?page=${page}&pageSize=${itemPerPage}`,
+        `${CONTROLLER}?page=${page}&pageSize=${itemPerPage}` +
+            (!name ? "" : `&name=${name}`),
     );
     return response.data;
 };
