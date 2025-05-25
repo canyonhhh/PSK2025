@@ -1,12 +1,13 @@
 using PSK2025.Models.DTOs;
+using PSK2025.Models.Enums;
 
 namespace PSK2025.ApiService.Services.Interfaces
 {
     public interface IAuthService
     {
-        Task<(bool Succeeded, string Token, string[] Errors)> LoginAsync(LoginDto model);
-        Task<(bool Succeeded, string[] Errors)> ForgotPasswordAsync(string email);
-        Task<(bool Succeeded, string[] Errors)> ResetPasswordAsync(string userId, string token, string newPassword);
-        Task<(bool Succeeded, string[] Errors)> ChangePasswordAsync(string userId, string currentPassword, string newPassword);
+        Task<(ServiceError Error, string Token)> LoginAsync(LoginDto model);
+        Task<ServiceError> ForgotPasswordAsync(string email);
+        Task<ServiceError> ResetPasswordAsync(string userId, string token, string newPassword);
+        Task<ServiceError> ChangePasswordAsync(string userId, string currentPassword, string newPassword);
     }
 }

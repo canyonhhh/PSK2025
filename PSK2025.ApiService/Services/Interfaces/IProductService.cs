@@ -5,7 +5,7 @@ namespace PSK2025.ApiService.Services.Interfaces
 {
     public interface IProductService
     {
-        Task<PaginatedResult<ProductDto>> GetAllProductsAsync(int page = 1, int pageSize = 10);
+        Task<PaginatedResult<ProductDto>> GetAllProductsAsync(string? name, int page = 1, int pageSize = 10);
         Task<(ProductDto? Product, ServiceError Error)> GetProductByIdAsync(string id);
         Task<(ProductDto? Product, ServiceError Error)> CreateProductAsync(CreateProductDto model);
         Task<(ProductDto? Product, ServiceError Error, ProductDto? ConflictingEntity)> UpdateProductAsync(string id, UpdateProductDto model);
