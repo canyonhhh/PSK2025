@@ -76,6 +76,9 @@ export function NavigationLayout() {
                     <ListItemButton component={Link} to={AppRoutes.ALL_ORDERS}>
                         <ListItemText primary="Orders" />
                     </ListItemButton>
+                    <ListItemButton component={Link} to={AppRoutes.STATISTICS}>
+                        <ListItemText primary="Statistics" />
+                    </ListItemButton>
                 </List>
             );
         }

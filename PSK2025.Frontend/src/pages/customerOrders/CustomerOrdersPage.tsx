@@ -10,7 +10,6 @@ const CustomerOrdersPage = () => {
     const queryClient = useQueryClient();
     const { id: userId } = useAuthContext();
     const [currentPage, setCurrentPage] = useState(1);
-    // TODO: use these fields for sorting
     const [ascending, setAscending] = useState(true);
     const [sortBy, setSortBy] = useState<number | undefined>(undefined);
     const [status, setStatus] = useState<number | undefined>(undefined);
@@ -31,13 +30,14 @@ const CustomerOrdersPage = () => {
                 sortBy,
                 ascending,
             ),
+        refetchInterval: 5000,
     });
 
     useEffect(() => {
         queryClient.invalidateQueries({ queryKey: keys.orders.all });
     }, [status, ascending, sortBy, status, queryClient]);
 
-    if (isLoading || isFetching) {
+    if (isLoading) {
         return (
             <Box
                 display="flex"
