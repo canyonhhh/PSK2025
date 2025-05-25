@@ -19,4 +19,11 @@ export const keys = {
     },
     activeCart: ["activeCart"],
     ordersByUser: (userId: string) => [`orders_${userId}`],
+    ordersOverTime: {
+        all: ["orders_over_time"],
+        byParams: (from: string, to: string, grouping: number) => [
+            "orders_over_time",
+            `from_${from}_to_${to}_grouping_${grouping}`,
+        ],
+    },
 };

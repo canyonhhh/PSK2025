@@ -79,8 +79,21 @@ const ProductMenuItem = ({ product }: ShopMenuItemProps) => {
                     </Button>
                 </>
             );
-        } else {
-            return;
+        } else if (role == Role.BARISTA) {
+            return (
+                <>
+                    <Button variant="outlined" onClick={handleOpenEditModal}>
+                        Edit
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="error"
+                        onClick={() => setIsConfirmationOpen(true)}
+                    >
+                        Delete
+                    </Button>
+                </>
+            );
         }
     };
 
