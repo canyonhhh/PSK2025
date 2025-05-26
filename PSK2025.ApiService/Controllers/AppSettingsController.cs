@@ -9,7 +9,6 @@ namespace PSK2025.ApiService.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    [Authorize(Roles = "Manager")]
     public class AppSettingsController : ControllerBase
     {
         private readonly IAppSettingsService _service;
