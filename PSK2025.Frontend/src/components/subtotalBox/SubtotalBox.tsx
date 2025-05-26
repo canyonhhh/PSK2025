@@ -10,14 +10,14 @@ interface OrderSummaryProps {
     onPaymentError: (message: string) => void;
 }
 
-const SubtotalBox: React.FC<OrderSummaryProps> = ({ 
-    items, 
+const SubtotalBox: React.FC<OrderSummaryProps> = ({
+    items,
     expectedCompletionTime,
     onPaymentSuccess,
-    onPaymentError
+    onPaymentError,
 }) => {
     const [showPayment, setShowPayment] = useState(false);
-    
+
     const subtotal = items.reduce(
         (sum, item) => sum + item.productPrice * item.quantity,
         0,
@@ -25,7 +25,7 @@ const SubtotalBox: React.FC<OrderSummaryProps> = ({
 
     if (showPayment) {
         return (
-            <Box sx={{ width: '100%' }}>
+            <Box sx={{ width: "100%" }}>
                 <StripePayment
                     amount={subtotal}
                     expectedCompletionTime={expectedCompletionTime}

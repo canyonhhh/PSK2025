@@ -1,5 +1,5 @@
 import { Alert, Box, CircularProgress, Snackbar } from "@mui/material";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { keys } from "../../api/queryKeyFactory";
 import {
     deleteCartItem,
@@ -13,7 +13,6 @@ import dayjs, { Dayjs } from "dayjs";
 import { useState } from "react";
 import SubtotalBox from "../../components/subtotalBox/SubtotalBox";
 import { UpdateCartItemDto } from "../../api/requests/cart/types/UpdateCartItemDto";
-import { useMutation } from "@tanstack/react-query";
 import { useAuthContext } from "../../context/AuthContext";
 
 const CartPage = () => {
@@ -21,7 +20,7 @@ const CartPage = () => {
     const authContext = useAuthContext();
     const [date, setDate] = useState<Dayjs | null>(dayjs().add(1, "day"));
     const [toastMessage, setToastMessage] = useState<string | null>();
-    
+
     const {
         data: cart,
         isLoading,
