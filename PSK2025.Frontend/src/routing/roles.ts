@@ -1,13 +1,13 @@
 export enum Role {
-  MANAGER = "Manager",
-  BARISTA = "Barista",
-  CUSTOMER = "Customer",
+    MANAGER = "Manager",
+    BARISTA = "Barista",
+    CUSTOMER = "Customer",
 }
 
 export const roleToRoleEnum: Record<string, Role> = Object.values(Role).reduce<
-  Record<string, Role>
+    Record<string, Role>
 >((acc, value) => {
-  acc[value] = value;
+    acc[value] = value;
 
-  return acc;
+    return acc;
 }, {});
