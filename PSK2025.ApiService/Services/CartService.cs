@@ -66,9 +66,6 @@ namespace PSK2025.ApiService.Services
         {
             try
             {
-                if (model.Quantity <= 0)
-                    return ServiceError.InvalidData;
-
                 var product = await _productRepository.GetByIdAsync(model.ProductId);
                 if (product == null)
                     return ServiceError.NotFound;
