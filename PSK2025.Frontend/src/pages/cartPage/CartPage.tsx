@@ -1,6 +1,5 @@
 import { Alert, Box, CircularProgress, Snackbar } from "@mui/material";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { keys } from "../../api/queryKeyFactory";
 import {
     deleteCartItem,
     fetchCart,
@@ -17,6 +16,7 @@ import { createOrder } from "../../api/requests/order/orderRequests";
 import { CreateOrderDto } from "../../api/requests/order/types/CreateOrderDto";
 import { useAuthContext } from "../../context/AuthContext";
 import { getAppStatus } from "../../api/requests/application/applicationRequests";
+import { keys } from "../../api/queryKeyFactory";
 
 const CartPage = () => {
     const queryClient = useQueryClient();

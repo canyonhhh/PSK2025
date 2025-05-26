@@ -47,14 +47,6 @@ export function ProductMenu() {
 
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-    if (!isFetching && !paginatedRows) {
-        return <Alert severity="error">Failed to retrieve Menu Items</Alert>;
-    }
-
-    if (isFetching || !paginatedRows || isAreOrdersStopedFetching) {
-        return <CircularProgress />;
-    }
-
     const forbidMakingOrders = () => {
         if (statusResponse?.orderingPaused) {
             continueOrders();
@@ -62,6 +54,14 @@ export function ProductMenu() {
             stopOrdres();
         }
     };
+
+    if (!isFetching && !paginatedRows) {
+        return <Alert severity="error">Failed to retrieve Menu Items</Alert>;
+    }
+
+    if (isFetching || !paginatedRows || isAreOrdersStopedFetching) {
+        return <CircularProgress />;
+    }
 
     return (
         <>
