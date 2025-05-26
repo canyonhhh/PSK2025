@@ -1,20 +1,20 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PSK2025.ApiService.Mappings;
-using PSK2025.ApiService.Services;
 using PSK2025.ApiService.Services.Decorators;
 using PSK2025.ApiService.Services.Interfaces;
+using PSK2025.ApiService.Services;
 using PSK2025.Data.Contexts;
-using PSK2025.Data.Repositories;
 using PSK2025.Data.Repositories.Interfaces;
+using PSK2025.Data.Repositories;
 using PSK2025.Data.Seed;
 using PSK2025.Models.Entities;
 using PSK2025.ServiceDefaults;
-using Serilog;
 using Serilog.Events;
+using Serilog;
+using Stripe;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -88,6 +88,8 @@ builder.Services.AddAuthentication(options =>
 // Add HttpContextAccessor (required for our interceptor)
 builder.Services.AddHttpContextAccessor();
 
+StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
+
 // Add Authorization
 builder.Services.AddAuthorization();
 
@@ -104,7 +106,7 @@ builder.Services.AddScoped<IAppSettingsRepository, AppSettingsRepository>();
 builder.Services.AddScoped<IRandomNumberService, RandomNumberService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IProductService, PSK2025.ApiService.Services.ProductService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IStatisticsService, StatisticsService>();
 builder.Services.AddScoped<IOrderService, OrderService>();

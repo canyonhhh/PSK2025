@@ -1,5 +1,5 @@
 import { Alert, Box, CircularProgress, Snackbar } from "@mui/material";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { keys } from "../../api/queryKeyFactory";
 import {
     deleteCartItem,
@@ -13,8 +13,7 @@ import dayjs, { Dayjs } from "dayjs";
 import { useState } from "react";
 import SubtotalBox from "../../components/subtotalBox/SubtotalBox";
 import { UpdateCartItemDto } from "../../api/requests/cart/types/UpdateCartItemDto";
-import { createOrder } from "../../api/requests/order/orderRequests";
-import { CreateOrderDto } from "../../api/requests/order/types/CreateOrderDto";
+import { useMutation } from "@tanstack/react-query";
 import { useAuthContext } from "../../context/AuthContext";
 
 const CartPage = () => {
@@ -22,6 +21,7 @@ const CartPage = () => {
     const authContext = useAuthContext();
     const [date, setDate] = useState<Dayjs | null>(dayjs().add(1, "day"));
     const [toastMessage, setToastMessage] = useState<string | null>();
+    
     const {
         data: cart,
         isLoading,
@@ -36,27 +36,24 @@ const CartPage = () => {
             queryClient.invalidateQueries({ queryKey: keys.activeCart }),
     });
 
-    const { mutate: createOrderMutation } = useMutation({
-        mutationFn: (createOrderDto: CreateOrderDto) =>
-            createOrder(createOrderDto),
-        onError: () => setToastMessage("Failed to create order"),
-        onSuccess: () => {
-            setToastMessage("Order created!");
-            queryClient.invalidateQueries({
-                queryKey: keys.ordersByUser(authContext.token ?? ""),
-            });
-            queryClient.invalidateQueries({
-                queryKey: keys.activeCart,
-            });
-        },
-    });
-
     const { mutate: deleteCartItemMutation } = useMutation({
         mutationFn: (id: string) => deleteCartItem(id),
         onError: () => setToastMessage("Failed to update cart item"),
         onSuccess: () =>
             queryClient.invalidateQueries({ queryKey: keys.activeCart }),
     });
+
+    const handlePaymentSuccess = (orderId: string) => {
+        setToastMessage(`Order created successfully! Order ID: ${orderId}`);
+        queryClient.invalidateQueries({ queryKey: keys.activeCart });
+        queryClient.invalidateQueries({
+            queryKey: keys.ordersByUser(authContext.id ?? ""),
+        });
+    };
+
+    const handlePaymentError = (message: string) => {
+        setToastMessage(`Payment failed: ${message}`);
+    };
 
     if (isLoading || isFetching) {
         return (
@@ -130,12 +127,10 @@ const CartPage = () => {
             >
                 <PickupTimeSelector date={date} setDate={setDate} />
                 <SubtotalBox
-                    onOrderCreate={() =>
-                        createOrderMutation({
-                            expectedCompletionTime: date?.toISOString() || "",
-                        })
-                    }
                     items={cart.items}
+                    expectedCompletionTime={date?.toISOString() || ""}
+                    onPaymentSuccess={handlePaymentSuccess}
+                    onPaymentError={handlePaymentError}
                 />
             </Box>
 
