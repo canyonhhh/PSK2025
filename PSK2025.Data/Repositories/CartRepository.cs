@@ -63,7 +63,7 @@ namespace PSK2025.Data.Repositories
             }
             else
             {
-                cartItem.Quantity += quantity;
+                cartItem.Quantity = quantity;
                 _dbContext.CartItems.Update(cartItem);
             }
 
