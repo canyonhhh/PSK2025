@@ -15,7 +15,6 @@ import SubtotalBox from "../../components/subtotalBox/SubtotalBox";
 import { UpdateCartItemDto } from "../../api/requests/cart/types/UpdateCartItemDto";
 import { useAuthContext } from "../../context/AuthContext";
 import { getAppStatus } from "../../api/requests/application/applicationRequests";
-import { keys } from "../../api/queryKeyFactory";
 
 const CartPage = () => {
     const queryClient = useQueryClient();
@@ -41,25 +40,6 @@ const CartPage = () => {
         onError: () => setToastMessage("Failed to update cart item"),
         onSuccess: () =>
             queryClient.invalidateQueries({ queryKey: keys.activeCart }),
-    });
-
-
-    const { mutate: createOrderMutation } = useMutation({
-        mutationFn: (createOrderDto: CreateOrderDto) =>
-            createOrder(createOrderDto),
-        onError: () => {
-            queryClient.invalidateQueries({ queryKey: keys.appStatus });
-            setToastMessage("Failed to create order");
-        },
-        onSuccess: () => {
-            setToastMessage("Order created!");
-            queryClient.invalidateQueries({
-                queryKey: keys.ordersByUser(authContext.token ?? ""),
-            });
-            queryClient.invalidateQueries({
-                queryKey: keys.activeCart,
-            });
-        },
     });
 
     const { mutate: deleteCartItemMutation } = useMutation({
