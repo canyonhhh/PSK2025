@@ -1,16 +1,48 @@
 import { Box, Typography, Divider, Button } from "@mui/material";
 import { CartItemDto } from "../../api/requests/cart/types/CartItemDto";
+import { useState } from "react";
+import StripePayment from "../payment/StripePayment";
 
 interface OrderSummaryProps {
     items: CartItemDto[];
-    onOrderCreate: () => void;
+    expectedCompletionTime: string;
+    onPaymentSuccess: (orderId: string) => void;
+    onPaymentError: (message: string) => void;
 }
 
-const SubtotalBox: React.FC<OrderSummaryProps> = ({ items, onOrderCreate }) => {
+const SubtotalBox: React.FC<OrderSummaryProps> = ({
+    items,
+    expectedCompletionTime,
+    onPaymentSuccess,
+    onPaymentError,
+}) => {
+    const [showPayment, setShowPayment] = useState(false);
+
     const subtotal = items.reduce(
         (sum, item) => sum + item.productPrice * item.quantity,
         0,
     );
+
+    if (showPayment) {
+        return (
+            <Box sx={{ width: "100%" }}>
+                <StripePayment
+                    amount={subtotal}
+                    expectedCompletionTime={expectedCompletionTime}
+                    onSuccess={onPaymentSuccess}
+                    onError={onPaymentError}
+                />
+                <Button
+                    variant="text"
+                    onClick={() => setShowPayment(false)}
+                    sx={{ mt: 1 }}
+                >
+                    ← Back to Order Summary
+                </Button>
+            </Box>
+        );
+    }
+
     return (
         <Box
             sx={{
@@ -30,7 +62,7 @@ const SubtotalBox: React.FC<OrderSummaryProps> = ({ items, onOrderCreate }) => {
             <Box display="flex" justifyContent="space-between" mb={2}>
                 <Typography fontWeight="bold">Total</Typography>
                 <Typography fontWeight="bold">
-                    {subtotal.toFixed(2)} €
+                    ${subtotal.toFixed(2)}
                 </Typography>
             </Box>
 
@@ -47,7 +79,7 @@ const SubtotalBox: React.FC<OrderSummaryProps> = ({ items, onOrderCreate }) => {
                         backgroundColor: "#000",
                     },
                 }}
-                onClick={onOrderCreate}
+                onClick={() => setShowPayment(true)}
             >
                 Proceed to Payment
             </Button>

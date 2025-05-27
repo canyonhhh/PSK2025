@@ -9,7 +9,6 @@ namespace PSK2025.ApiService.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    [Authorize(Roles = "Manager")]
     public class AppSettingsController : ControllerBase
     {
         private readonly IAppSettingsService _service;
@@ -34,6 +33,7 @@ namespace PSK2025.ApiService.Controllers
         }
 
         [HttpPost("pause")]
+        [Authorize(Roles = "Manager")]
         public async Task<IActionResult> PauseOrdering()
         {
             var error = await _service.PauseOrderingAsync();
@@ -48,6 +48,7 @@ namespace PSK2025.ApiService.Controllers
         }
 
         [HttpPost("resume")]
+        [Authorize(Roles = "Manager")]
         public async Task<IActionResult> ResumeOrdering()
         {
             var error = await _service.ResumeOrderingAsync();
