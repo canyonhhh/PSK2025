@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PSK2025.ApiService.Services.Interfaces;
+using PSK2025.Data.Repositories.Interfaces;
 using PSK2025.Models.DTOs;
+using PSK2025.Models.Entities;
 using PSK2025.Models.Enums;
 using PSK2025.Models.Extensions;
 using Stripe;
-using PSK2025.Data.Repositories.Interfaces;
-using PSK2025.Models.Entities;
 
 namespace PSK2025.ApiService.Controllers
 {
@@ -44,7 +44,7 @@ namespace PSK2025.ApiService.Controllers
             try
             {
                 var userId = _getUserIdService.GetUserIdFromToken();
-                
+
                 // Get user's cart to calculate total
                 var cart = await _cartRepository.GetCartByUserIdAsync(userId);
                 if (cart == null || cart.Items.Count == 0)
@@ -55,7 +55,7 @@ namespace PSK2025.ApiService.Controllers
                 var totalAmount = cart.Items.Sum(item => item.Product!.Price * item.Quantity);
                 var amountInCents = (long)(totalAmount * 100); // Convert to cents for Stripe
 
-                _logger.LogInformation("Creating payment intent for user {UserId} with amount {Amount}", 
+                _logger.LogInformation("Creating payment intent for user {UserId} with amount {Amount}",
                     userId, totalAmount);
 
                 var paymentIntentService = new PaymentIntentService();
@@ -107,8 +107,8 @@ namespace PSK2025.ApiService.Controllers
             try
             {
                 var userId = _getUserIdService.GetUserIdFromToken();
-                
-                _logger.LogInformation("Confirming payment for user {UserId}, payment intent {PaymentIntentId}", 
+
+                _logger.LogInformation("Confirming payment for user {UserId}, payment intent {PaymentIntentId}",
                     userId, request.PaymentIntentId);
 
                 var paymentIntentService = new PaymentIntentService();
@@ -153,7 +153,7 @@ namespace PSK2025.ApiService.Controllers
                     await _orderRepository.CreateAsync(order);
                     await _cartRepository.ClearCartAsync(userId);
 
-                    _logger.LogInformation("Payment confirmed and order created for user {UserId}, order {OrderId}", 
+                    _logger.LogInformation("Payment confirmed and order created for user {UserId}, order {OrderId}",
                         userId, order.Id);
 
                     return Ok(new
