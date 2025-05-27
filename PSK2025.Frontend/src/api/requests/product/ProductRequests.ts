@@ -42,3 +42,12 @@ export const updateProduct = async (
 export const deleteProduct = async (id: string): Promise<void> => {
     await api.delete<void>(`${CONTROLLER}/${id}`);
 };
+
+export const changeProductAvailability = async (
+    inStock: boolean,
+    id: string,
+): Promise<void> => {
+    await api.put<void>(`${CONTROLLER}/${id}/availability`, {
+        isAvailable: inStock,
+    });
+};

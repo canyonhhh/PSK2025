@@ -1,17 +1,23 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Alert, Box, Button, CircularProgress } from "@mui/material";
 import { keys } from "../../api/queryKeyFactory";
 import { fetchAllProducts } from "../../api/requests/product/ProductRequests";
 import ProductMenuItem from "./productMenuItem/ProductMenuItem";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { useAuthContext } from "../../context/AuthContext";
 import { Role } from "../../routing/roles";
 import CreateProductModal from "./CreateProductModal";
 import { PaginatedItems } from "../paginatedItemBox/PaginatedItemBox";
+import {
+    getAppStatus,
+    pauseOrders,
+    resumeOrders,
+} from "../../api/requests/application/applicationRequests";
 
 const SIZE_PER_PAGE = 12;
 
 export function ProductMenu() {
+    const queryClient = useQueryClient();
     const { role } = useAuthContext();
     const [pageCount, setPageCount] = useState(1);
     let { data: paginatedRows, isFetching } = useQuery({
@@ -19,13 +25,41 @@ export function ProductMenu() {
         queryFn: () => fetchAllProducts(pageCount, SIZE_PER_PAGE),
     });
 
+    let { data: statusResponse, isFetching: isAreOrdersStopedFetching } =
+        useQuery({
+            queryKey: keys.appStatus,
+            queryFn: getAppStatus,
+        });
+
+    const { mutate: stopOrdres } = useMutation({
+        mutationFn: pauseOrders,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: keys.appStatus });
+        },
+    });
+
+    const { mutate: continueOrders } = useMutation({
+        mutationFn: resumeOrders,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: keys.appStatus });
+        },
+    });
+
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+    const forbidMakingOrders = () => {
+        if (statusResponse?.orderingPaused) {
+            continueOrders();
+        } else {
+            stopOrdres();
+        }
+    };
 
     if (!isFetching && !paginatedRows) {
         return <Alert severity="error">Failed to retrieve Menu Items</Alert>;
     }
 
-    if (isFetching || !paginatedRows) {
+    if (isFetching || !paginatedRows || isAreOrdersStopedFetching) {
         return <CircularProgress />;
     }
 
@@ -39,14 +73,24 @@ export function ProductMenu() {
                 pb={2}
             >
                 {role == Role.MANAGER && (
-                    <Button
-                        variant="outlined"
-                        onClick={() => {
-                            setIsCreateModalOpen((prevState) => !prevState);
-                        }}
-                    >
-                        Create Product
-                    </Button>
+                    <Fragment>
+                        <Button
+                            variant="outlined"
+                            onClick={() => {
+                                setIsCreateModalOpen((prevState) => !prevState);
+                            }}
+                        >
+                            Create Product
+                        </Button>
+                        <Button
+                            variant="contained"
+                            onClick={forbidMakingOrders}
+                        >
+                            {statusResponse?.orderingPaused
+                                ? "Allow making of orders"
+                                : "Disallow making of new orders"}
+                        </Button>
+                    </Fragment>
                 )}
             </Box>
             <PaginatedItems

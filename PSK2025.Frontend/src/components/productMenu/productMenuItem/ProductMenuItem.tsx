@@ -3,7 +3,10 @@ import noProductImage from "../../../no-photos.png";
 import { useState } from "react";
 import ItemEditModal from "./ItemEditModal";
 import { ProductDto } from "../../../api/types/Product";
-import { deleteProduct } from "../../../api/requests/product/ProductRequests";
+import {
+    changeProductAvailability,
+    deleteProduct,
+} from "../../../api/requests/product/ProductRequests";
 import ConfirmationModal from "../../confirmationModal/ConfirmationModal";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { keys } from "../../../api/queryKeyFactory";
@@ -31,7 +34,16 @@ const ProductMenuItem = ({ product }: ShopMenuItemProps) => {
             queryClient.invalidateQueries({ queryKey: keys.allProductsAll }),
     });
 
-    const markItemOutOfStock = () => setInStock((isInStock) => !isInStock);
+    const { mutate: changeInStockMutation } = useMutation({
+        mutationFn: () => changeProductAvailability(!inStock, product.id),
+        onSuccess: () =>
+            queryClient.invalidateQueries({ queryKey: keys.allProductsAll }),
+    });
+
+    const markItemOutOfStock = () => {
+        changeInStockMutation();
+        setInStock((isInStock) => !isInStock);
+    };
 
     const { mutate: addToCartMutation } = useMutation({
         mutationFn: () =>

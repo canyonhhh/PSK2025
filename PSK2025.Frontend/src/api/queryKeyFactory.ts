@@ -31,4 +31,5 @@ export const keys = {
         bottom: ["shit_products"],
     },
     employees: ["employees"],
+    appStatus: ["app_status"],
 };

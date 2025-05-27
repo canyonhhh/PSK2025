@@ -14,6 +14,8 @@ import { useState } from "react";
 import SubtotalBox from "../../components/subtotalBox/SubtotalBox";
 import { UpdateCartItemDto } from "../../api/requests/cart/types/UpdateCartItemDto";
 import { useAuthContext } from "../../context/AuthContext";
+import { getAppStatus } from "../../api/requests/application/applicationRequests";
+import { keys } from "../../api/queryKeyFactory";
 
 const CartPage = () => {
     const queryClient = useQueryClient();
@@ -28,11 +30,36 @@ const CartPage = () => {
         isError,
     } = useQuery({ queryKey: keys.activeCart, queryFn: fetchCart });
 
+    let { data: statusResponse, isFetching: isAreOrdersStopedFetching } =
+        useQuery({
+            queryKey: keys.appStatus,
+            queryFn: getAppStatus,
+        });
+
     const { mutate: updateCartItemMutation } = useMutation({
         mutationFn: (updateDto: UpdateCartItemDto) => updateCartItem(updateDto),
         onError: () => setToastMessage("Failed to update cart item"),
         onSuccess: () =>
             queryClient.invalidateQueries({ queryKey: keys.activeCart }),
+    });
+
+
+    const { mutate: createOrderMutation } = useMutation({
+        mutationFn: (createOrderDto: CreateOrderDto) =>
+            createOrder(createOrderDto),
+        onError: () => {
+            queryClient.invalidateQueries({ queryKey: keys.appStatus });
+            setToastMessage("Failed to create order");
+        },
+        onSuccess: () => {
+            setToastMessage("Order created!");
+            queryClient.invalidateQueries({
+                queryKey: keys.ordersByUser(authContext.token ?? ""),
+            });
+            queryClient.invalidateQueries({
+                queryKey: keys.activeCart,
+            });
+        },
     });
 
     const { mutate: deleteCartItemMutation } = useMutation({
@@ -54,7 +81,7 @@ const CartPage = () => {
         setToastMessage(`Payment failed: ${message}`);
     };
 
-    if (isLoading || isFetching) {
+    if (isLoading || isFetching || isAreOrdersStopedFetching) {
         return (
             <Box display="flex" justifyContent="center" alignItems="center">
                 <CircularProgress />
@@ -64,6 +91,12 @@ const CartPage = () => {
 
     if ((!isFetching && (isError || !cart)) || !cart) {
         return <Alert severity="error">Failed to retrieve Menu Items</Alert>;
+    }
+
+    if (statusResponse?.orderingPaused) {
+        return (
+            <Alert severity="warning">Ordering is stoped at the moment</Alert>
+        );
     }
 
     const renderCartItems = () => {
