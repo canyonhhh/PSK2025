@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import {
     Elements,
@@ -10,8 +10,8 @@ import {
     Box,
     Button,
     Typography,
-    Alert,
     CircularProgress,
+    Alert,
     Paper,
 } from "@mui/material";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -56,62 +56,58 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
     const queryClient = useQueryClient();
     const authContext = useAuthContext();
 
-    const [clientSecret, setClientSecret] = useState<string>("");
-    const [paymentIntentId, setPaymentIntentId] = useState<string>("");
+    const [clientSecret, setClientSecret] = useState("");
+    const [paymentIntentId, setPaymentIntentId] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
     const [isProcessing, setIsProcessing] = useState(false);
-    const [errorMessage, setErrorMessage] = useState<string>("");
 
-    const createIntentMutation = useMutation({
+    const createIntent = useMutation({
         mutationFn: createPaymentIntent,
         onSuccess: (data) => {
             setClientSecret(data.clientSecret);
             setPaymentIntentId(data.paymentIntentId);
         },
-        onError: () => {
-            onError("Failed to initialize payment");
-        },
+        onError: () => onError("Failed to initialize payment"),
     });
 
     const confirmPaymentMutation = useMutation({
         mutationFn: confirmPayment,
         onSuccess: (data) => {
             if (data.success && data.orderId) {
-                onSuccess(data.orderId);
                 queryClient.invalidateQueries({ queryKey: keys.activeCart });
                 queryClient.invalidateQueries({
                     queryKey: keys.ordersByUser(authContext.id ?? ""),
                 });
+                onSuccess(data.orderId);
             } else {
                 onError(data.message || "Payment failed");
             }
         },
-        onError: () => {
-            onError("Payment confirmation failed");
-        },
+        onError: () => onError("Payment confirmation failed"),
     });
 
     useEffect(() => {
-        if (amount > 0 && expectedCompletionTime) {
-            createIntentMutation.mutate({
-                currency: "usd",
-                expectedCompletionTime,
-            });
+        if (
+            !clientSecret &&
+            amount > 0 &&
+            expectedCompletionTime &&
+            !createIntent.isPending &&
+            !createIntent.isSuccess
+        ) {
+            createIntent.mutate({ currency: "usd", expectedCompletionTime });
         }
-    }, [amount, createIntentMutation, expectedCompletionTime]);
+    }, [amount, expectedCompletionTime, createIntent, clientSecret]);
 
-    const handleSubmit = async (event: React.FormEvent) => {
-        event.preventDefault();
-
-        if (!stripe || !elements || !clientSecret) {
-            return;
-        }
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!stripe || !elements || !clientSecret) return;
 
         setIsProcessing(true);
         setErrorMessage("");
 
-        const cardElement = elements.getElement(CardElement);
-        if (!cardElement) {
-            setErrorMessage("Card element not found");
+        const card = elements.getElement(CardElement);
+        if (!card) {
+            setErrorMessage("Card information is missing.");
             setIsProcessing(false);
             return;
         }
@@ -120,30 +116,30 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
             const { error, paymentIntent } = await stripe.confirmCardPayment(
                 clientSecret,
                 {
-                    payment_method: {
-                        card: cardElement,
-                    },
+                    payment_method: { card },
                 },
             );
 
             if (error) {
-                setErrorMessage(error.message || "Payment failed");
-            } else if (paymentIntent && paymentIntent.status === "succeeded") {
-                // Confirm payment with backend
-                confirmPaymentMutation.mutate({
-                    paymentIntentId: paymentIntentId,
-                });
+                setErrorMessage(error.message || "Payment failed.");
+            } else if (paymentIntent?.status === "succeeded") {
+                confirmPaymentMutation.mutate({ paymentIntentId });
             }
-        } catch (err) {
-            setErrorMessage("An unexpected error occurred");
+        } catch {
+            setErrorMessage("Unexpected error occurred.");
         } finally {
             setIsProcessing(false);
         }
     };
 
-    if (createIntentMutation.isPending) {
+    if (createIntent.isPending) {
         return (
-            <Box display="flex" justifyContent="center" p={2}>
+            <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                p={4}
+            >
                 <CircularProgress />
             </Box>
         );
@@ -154,17 +150,17 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
             <Typography variant="h6" gutterBottom>
                 Payment Details
             </Typography>
-            <Typography variant="body2" color="text.secondary" gutterBottom>
+            <Typography variant="body1" gutterBottom>
                 Total: ${amount.toFixed(2)}
             </Typography>
 
             <form onSubmit={handleSubmit}>
                 <Box
                     sx={{
-                        my: 2,
                         p: 2,
-                        border: "1px solid #ddd",
-                        borderRadius: 1,
+                        border: "1px solid #ccc",
+                        borderRadius: 2,
+                        mb: 2,
                     }}
                 >
                     <CardElement options={cardElementOptions} />
@@ -185,16 +181,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
                         isProcessing ||
                         confirmPaymentMutation.isPending
                     }
-                    sx={{
-                        backgroundColor: "#212121",
-                        borderRadius: 2,
-                        textTransform: "none",
-                        fontWeight: 500,
-                        fontSize: "1rem",
-                        "&:hover": {
-                            backgroundColor: "#000",
-                        },
-                    }}
+                    sx={{ py: 1.5, fontSize: "1rem", borderRadius: 2 }}
                 >
                     {isProcessing || confirmPaymentMutation.isPending ? (
                         <CircularProgress size={24} color="inherit" />
